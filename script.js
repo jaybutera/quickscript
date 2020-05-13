@@ -25,9 +25,8 @@ class Scene {
     constructor(canvas, ctx) {
         this.ctx = ctx;
         this.BB  = canvas.getBoundingClientRect();
-        this.offsetX = this.BB.left;
+        this.offsetX = this.BB.top;
         this.offsetY = this.BB.top;
-        console.log(this.offsetY);
         this.WIDTH   = canvas.width;
         this.HEIGHT  = canvas.height;
 
@@ -37,30 +36,30 @@ class Scene {
         this.startY;
     }
 
-    drawCons(cons) {
-        ctx.fillStyle = 'green';
-        ctx.fillRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
+    drawCons = (cons) => {
+        this.ctx.fillStyle = 'green';
+        this.ctx.fillRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
 
         // Write data on cell
-        ctx.fillText(cons.car, cons.x+10, cons.y);
-        ctx.fillText(cons.cdr, cons.x+60, cons.y);
-    };
+        this.ctx.fillText(cons.car, cons.x+10, cons.y);
+        this.ctx.fillText(cons.cdr, cons.x+60, cons.y);
+    }
 
-    line(l) {
-        ctx.beginPath();
-        ctx.moveTo(l.x0, l.y0);
-        ctx.lineTo(l.x1, l.y1);
-        ctx.closePath();
-        ctx.stroke();
-    };
+    line = (l) => {
+        this.ctx.beginPath();
+        this.ctx.moveTo(l.x0, l.y0);
+        this.ctx.lineTo(l.x1, l.y1);
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
 
     // clear the canvas
-    clear() {
+    clear = () => {
         ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     }
 
     // redraw the scene
-    draw() {
+    draw = () => {
         this.clear();
 
         // redraw each shape in the shapes[] array
@@ -80,23 +79,21 @@ class Scene {
 
 
     // handle mousedown events
-    myDown(e) {
+    myDown = (e) => {
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
 
         // get the current mouse position
-        var mx=parseInt(e.clientX - this.offsetX);
-        var my=parseInt(e.clientY - this.offsetY);
+        var mx=parseInt(e.clientX - 0/*this.offsetX*/);
+        var my=parseInt(e.clientY - 0/*this.offsetY*/);
 
         // test each shape to see if mouse is inside
         this.dragok=false;
         for(var i=0;i<shapes.length;i++){
             var s=shapes[i];
             // decide if the shape is a rect or circle
-            console.log("checking (" + mx + "," + my + ")");
             if (mx > s.x && mx < s.x + CELL_WIDTH && my > s.y && my < s.y + CELL_HEIGHT) {
-                console.log("yup!");
                 this.dragok = true;
                 s.isDragging = true;
             }
@@ -127,7 +124,7 @@ class Scene {
 
 
     // handle mouseup events
-    myUp(e) {
+    myUp = (e) => {
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
@@ -141,7 +138,7 @@ class Scene {
 
 
     // handle mouse moves
-    myMove(e) {
+    myMove = (e) =>{
         // if we're dragging anything...
         if (this.dragok){
 
@@ -150,8 +147,8 @@ class Scene {
             e.stopPropagation();
 
             // get the current mouse position
-            var mx=parseInt(e.clientX - this.offsetX);
-            var my=parseInt(e.clientY - this.offsetY);
+            var mx=parseInt(e.clientX - 0/*this.offsetX*/);
+            var my=parseInt(e.clientY - 0/*this.offsetY*/);
 
             // calculate the distance the mouse has moved
             // since the last mousemove
@@ -170,7 +167,7 @@ class Scene {
             }
 
             // redraw the scene with the new rect positions
-            draw();
+            this.draw();
 
             // reset the starting mouse position for the next mousemove
             this.startX=mx;
