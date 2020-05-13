@@ -11,18 +11,19 @@ function genName() {
 }
 
 // If no name is given, algorithmically assign one
-function newConsCell (x, y, car="", cdr="nil", name=newName()) {
+function newConsCell (x, y, car="", cdr="nil", name=genName()) {
     return {
         name: name,
         car: car,
         cdr: cdr,
         x: x,
         y: y,
+        isDragging: false,
     }
 }
 
 class Scene {
-    constructor(canvas, ctx) {
+    constructor(canvas, ctx, cells) {
         this.ctx = ctx;
         this.BB  = canvas.getBoundingClientRect();
         this.offsetX = this.BB.top;
@@ -34,6 +35,24 @@ class Scene {
         this.dragok  = false;
         this.startX;
         this.startY;
+
+        // Scene state
+        this.selected = [0, false];
+        this.cells = cells;
+        console.log(this.cells)
+    }
+
+    setCellValue = (v) => {
+        let [i,is_car] = this.selected;
+        console.log(this.cells[i]);
+
+        if ( is_car )
+            this.cells[i].car = v;
+        else
+            this.cells[i].cdr = v;
+
+        // Redraw
+        this.draw();
     }
 
     drawCons = (cons) => {
@@ -63,10 +82,8 @@ class Scene {
         this.clear();
 
         // redraw each shape in the shapes[] array
-        for(var i=0;i<shapes.length;i++){
-            // decide if the shape is a rect or circle
-            // (it's a rect if it has a width property)
-            this.drawCons( shapes[i] );
+        for ( const c of this.cells ) {
+            this.drawCons( c );
             /*
             if(shapes[i].width){
                 rect(shapes[i]);
@@ -85,17 +102,23 @@ class Scene {
         e.stopPropagation();
 
         // get the current mouse position
-        var mx=parseInt(e.clientX - 0/*this.offsetX*/);
-        var my=parseInt(e.clientY - 0/*this.offsetY*/);
+        var mx=parseInt(e.clientX - this.offsetX);
+        var my=parseInt(e.clientY - this.offsetY);
 
         // test each shape to see if mouse is inside
         this.dragok=false;
-        for(var i=0;i<shapes.length;i++){
-            var s=shapes[i];
+        for ( let i = 0; i < this.cells.length; i++ ) {
+            let s = this.cells[i];
             // decide if the shape is a rect or circle
             if (mx > s.x && mx < s.x + CELL_WIDTH && my > s.y && my < s.y + CELL_HEIGHT) {
                 this.dragok = true;
                 s.isDragging = true;
+
+                // Check which cell was selected
+                if (mx < s.x + CELL_WIDTH/2)
+                    this.selected = [i, true];
+                else
+                    this.selected = [i, false];
             }
             /*
             if(s.width){
@@ -131,9 +154,9 @@ class Scene {
 
         // clear all the dragging flags
         this.dragok = false;
-        for(var i=0;i<shapes.length;i++){
-            shapes[i].isDragging=false;
-        }
+
+        for ( const c of this.cells )
+            c.isDragging=false;
     }
 
 
@@ -147,8 +170,8 @@ class Scene {
             e.stopPropagation();
 
             // get the current mouse position
-            var mx=parseInt(e.clientX - 0/*this.offsetX*/);
-            var my=parseInt(e.clientY - 0/*this.offsetY*/);
+            var mx=parseInt(e.clientX - this.offsetX);
+            var my=parseInt(e.clientY - this.offsetY);
 
             // calculate the distance the mouse has moved
             // since the last mousemove
@@ -158,8 +181,7 @@ class Scene {
             // move each rect that isDragging
             // by the distance the mouse has moved
             // since the last mousemove
-            for(var i=0;i<shapes.length;i++){
-                var s=shapes[i];
+            for ( const s of this.cells ) {
                 if(s.isDragging){
                     s.x+=dx;
                     s.y+=dy;
