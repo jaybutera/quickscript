@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+        </style>
+    </head>
+    <body data-rsssl=1>
+        <canvas id="myCanvas" width="578" height="200"></canvas>
+        <script src = "script.js"></script>
+        <script>
+            var canvas = document.getElementById('myCanvas');
+            var ctx = canvas.getContext('2d');
+
+            let scene = new Scene(canvas, ctx);
+
+            // an array of objects that define different shapes
+            var shapes=[];
+            // define 2 rectangles
+            shapes.push({x:10,y:100,width:30,height:30,fill:"#444444",isDragging:false});
+            shapes.push({x:80,y:100,width:30,height:30,fill:"#ff550d",isDragging:false});
+            // define 2 circles
+            //shapes.push({x:150,y:100,r:10,fill:"#800080",isDragging:false});
+            //shapes.push({x:200,y:100,r:10,fill:"#0c64e8",isDragging:false});
+
+            // listen for mouse events
+            canvas.onmousedown = scene.myDown;
+            canvas.onmouseup = scene.myUp;
+            canvas.onmousemove = scene.myMove;
+
+            // call to draw the scene
+            scene.draw();
+        </script>
+    </body>
+</html>
