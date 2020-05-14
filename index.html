@@ -9,13 +9,17 @@
         </style>
     </head>
     <body data-rsssl=1>
-        <canvas id="myCanvas" width="578" height="200"></canvas>
+        <canvas id="myCanvas" width="700" height="400"></canvas>
         <script src = "script.js"></script>
         <script src = "compiler.js"></script>
 
         <input type="text" id="var-name">
         <input type="submit" id="submit-name" value="submit">
+        <input type="submit" id="new-connect" value="->">
+        <br />
+        <br />
         <input type="submit" id="compile" value="compile">
+        <br />
         <textarea id="lisp-code"></textarea>
 
         <script>
@@ -34,10 +38,14 @@
                 document.getElementById('var-name').value );
 
             document.getElementById('compile').onclick = () => {
-                let src_cell = cells[ scene.selected[0] ];
-                let code_str = compile(src_cell, cells)
+                let src_cell = scene.context[ scene.selected[0] ];
+                let cons_list = cells.filter( c => c.type == 'cons');
+
+                let code_str = compile(src_cell, cons);
                 document.getElementById('lisp-code').value = code_str;
             };
+
+            document.getElementById('new-connect').onclick = () => { scene.connecting = true; };
             // an array of objects that define different shapes
             //var shapes=[];
             // define 2 rectangles

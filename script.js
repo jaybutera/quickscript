@@ -4,15 +4,16 @@ const CELL_HEIGHT = 30;
 // An algorithmic global name generator
 // TODO: Change this to a hash of the object being named
 var name_counter = 0;
-function genName() {
+function genConsName() {
     let n = 'x' + name_counter;
     name_counter += 1;
     return n;
 }
 
 // If no name is given, algorithmically assign one
-function newConsCell (x, y, car="", cdr="nil", name=genName()) {
+function newConsCell (x, y, car="", cdr="nil", name=genConsName()) {
     return {
+        type: 'cons',
         name: name,
         car: car,
         cdr: cdr,
@@ -20,6 +21,18 @@ function newConsCell (x, y, car="", cdr="nil", name=genName()) {
         y: y,
         isDragging: false,
     }
+}
+
+function newLine (x0,y0,x1,y1, from="", to="") {
+    return {
+        type: 'line',
+        from: from, // name of object the line starts from
+        to: to,
+        x0: x0,
+        y0: y0,
+        x1: x1,
+        y1: y1,
+    };
 }
 
 class Scene {
@@ -37,19 +50,29 @@ class Scene {
         this.startY;
 
         // Scene state
-        this.selected = [0, false];
+        this.selected = [cells ? cells[0].name : "", false];
         this.cells = cells;
-        console.log(this.cells)
+        this.connecting = false;
+
+        // Name to cell mapping for convenience and safety <3
+        this.context = {};
+        cells.forEach( c => { this.context[ c.name ] = c });
+
+        this.type_map = {
+            'cons': this.drawCons,
+            'line': this.drawLine,
+        };
     }
 
     setCellValue = (v) => {
-        let [i,is_car] = this.selected;
-        console.log(this.cells[i]);
+        let [name, is_car] = this.selected;
+        let c = this.context[name];
+        console.log(c);
 
         if ( is_car )
-            this.cells[i].car = v;
+            c.car = v;
         else
-            this.cells[i].cdr = v;
+            c.cdr = v;
 
         // Redraw
         this.draw();
@@ -64,13 +87,36 @@ class Scene {
         this.ctx.fillText(cons.cdr, cons.x+60, cons.y);
     }
 
-    line = (l) => {
+    drawLine = (l) => {
         this.ctx.beginPath();
         this.ctx.moveTo(l.x0, l.y0);
         this.ctx.lineTo(l.x1, l.y1);
         this.ctx.closePath();
         this.ctx.stroke();
     }
+
+    getCellAt = (mx, my) => {
+        let cell = this.cells
+            .filter( c => c.type == 'cons' )
+            .find( c => {
+                return mx > c.x && mx < c.x + CELL_WIDTH
+                    && my > c.y && my < c.y + CELL_HEIGHT;
+            });
+
+        let is_car = false;
+        // Either car or cdr side was clicked
+        if (cell && mx < cell.x + CELL_WIDTH/2)
+            is_car = true;
+
+        return [cell, is_car];
+    }
+
+    /*
+    getMousePos = () => {
+        return [parseInt(e.clientX - this.offsetX),
+                parseInt(e.clientY - this.offsetY)];
+    }
+    */
 
     // clear the canvas
     clear = () => {
@@ -83,7 +129,8 @@ class Scene {
 
         // redraw each shape in the shapes[] array
         for ( const c of this.cells ) {
-            this.drawCons( c );
+            this.type_map[ c.type ](c);
+            //this.drawCons( c );
             /*
             if(shapes[i].width){
                 rect(shapes[i]);
@@ -105,8 +152,26 @@ class Scene {
         var mx=parseInt(e.clientX - this.offsetX);
         var my=parseInt(e.clientY - this.offsetY);
 
-        // test each shape to see if mouse is inside
-        this.dragok=false;
+        this.dragok = false;
+
+        let [clicked_cell, is_car] = this.getCellAt(mx, my);
+
+        if (clicked_cell) {
+            if (this.connecting) {
+                this.cells.push( newLine(mx,my,mx,my, clicked_cell.name) );
+            }
+            else {
+                this.dragok = true;
+                clicked_cell.isDragging = true;
+
+                if (is_car)
+                    this.selected = [clicked_cell.name, true];
+                else
+                    this.selected = [clicked_cell.name, false];
+            }
+        }
+
+        /*
         for ( let i = 0; i < this.cells.length; i++ ) {
             let s = this.cells[i];
             // decide if the shape is a rect or circle
@@ -120,25 +185,8 @@ class Scene {
                 else
                     this.selected = [i, false];
             }
-            /*
-            if(s.width){
-                // test if the mouse is inside this rect
-                if(mx>s.x && mx<s.x+s.width && my>s.y && my<s.y+s.height){
-                    // if yes, set that rects isDragging=true
-                    this.dragok=true;
-                    s.isDragging=true;
-                }
-            }else{
-                var dx=s.x-mx;
-                var dy=s.y-my;
-                // test if the mouse is inside this circle
-                if(dx*dx+dy*dy<s.r*s.r){
-                    this.dragok=true;
-                    s.isDragging=true;
-                }
-            }
-            */
         }
+        */
 
         // save the current mouse position
         this.startX=mx;
@@ -152,19 +200,40 @@ class Scene {
         e.preventDefault();
         e.stopPropagation();
 
-        // clear all the dragging flags
-        this.dragok = false;
+        if (this.connecting) {
+            this.connecting = false;
+            let line = this.cells[ this.cells.length-1 ];
 
-        for ( const c of this.cells )
-            c.isDragging=false;
+            // Current mouse position
+            let mx = parseInt(e.clientX - this.offsetX);
+            let my = parseInt(e.clientY - this.offsetY);
+
+            // Get cell ended at
+            let [cell, _] = this.getCellAt(mx, my);
+
+            // Update line ending position
+            line.x1 = mx;
+            line.y1 = my;
+
+            line.to = cell.name;
+
+            // Redraw
+            this.draw();
+        }
+        else {
+            // clear all the dragging flags
+            this.dragok = false;
+
+            for ( let c of this.cells )
+                c.isDragging=false;
+        }
     }
 
 
     // handle mouse moves
     myMove = (e) =>{
         // if we're dragging anything...
-        if (this.dragok){
-
+        if (this.dragok) {
             // tell the browser we're handling this mouse event
             e.preventDefault();
             e.stopPropagation();
@@ -181,11 +250,36 @@ class Scene {
             // move each rect that isDragging
             // by the distance the mouse has moved
             // since the last mousemove
+            /*
             for ( const s of this.cells ) {
                 if(s.isDragging){
                     s.x+=dx;
                     s.y+=dy;
                 }
+            }
+            */
+            const cell_name = this.selected[0];
+            let cell = this.context[ cell_name ];
+            if ( cell ) {
+                cell.x += dx;
+                cell.y += dy;
+
+                // Also update any lines referencing the cell
+                this.cells
+                    .filter( c => c.type == 'line' )
+                    .forEach( c => {
+                        console.log(c)
+                        if ( c.from == cell_name ) {
+                            console.log('YUP!')
+                            c.x0 += dx;
+                            c.y0 += dy;
+                        }
+                        else if ( c.to == cell_name ) {
+                            console.log('YUP!')
+                            c.x1 += dx;
+                            c.y1 += dy;
+                        }
+                    });
             }
 
             // redraw the scene with the new rect positions
