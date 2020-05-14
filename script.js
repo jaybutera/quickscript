@@ -23,11 +23,12 @@ function newConsCell (x, y, car="", cdr="nil", name=genConsName()) {
     }
 }
 
-function newLine (x0,y0,x1,y1, from="", to="") {
+function newLine (x0,y0,x1,y1, from="", from_is_car=false, to="") {
     return {
         type: 'line',
         from: from, // name of object the line starts from
         to: to,
+        from_is_car: from_is_car,
         x0: x0,
         y0: y0,
         x1: x1,
@@ -158,7 +159,7 @@ class Scene {
 
         if (clicked_cell) {
             if (this.connecting) {
-                this.cells.push( newLine(mx,my,mx,my, clicked_cell.name) );
+                this.cells.push( newLine(mx,my,mx,my, clicked_cell.name, is_car) );
             }
             else {
                 this.dragok = true;
@@ -211,11 +212,17 @@ class Scene {
             // Get cell ended at
             let [cell, _] = this.getCellAt(mx, my);
 
-            // Update line ending position
+            // Update line ending info
             line.x1 = mx;
             line.y1 = my;
-
             line.to = cell.name;
+
+            // Finally update reference name in starting cell
+            let from_cell = this.context[ line.from ];
+            if ( line.from_is_car )
+                from_cell.car = cell.name;
+            else
+                from_cell.cdr = cell.name;
 
             // Redraw
             this.draw();
@@ -268,14 +275,11 @@ class Scene {
                 this.cells
                     .filter( c => c.type == 'line' )
                     .forEach( c => {
-                        console.log(c)
                         if ( c.from == cell_name ) {
-                            console.log('YUP!')
                             c.x0 += dx;
                             c.y0 += dy;
                         }
                         else if ( c.to == cell_name ) {
-                            console.log('YUP!')
                             c.x1 += dx;
                             c.y1 += dy;
                         }

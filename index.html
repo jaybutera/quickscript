@@ -41,7 +41,7 @@
                 let src_cell = scene.context[ scene.selected[0] ];
                 let cons_list = cells.filter( c => c.type == 'cons');
 
-                let code_str = compile(src_cell, cons);
+                let code_str = compile(src_cell, cons_list);
                 document.getElementById('lisp-code').value = code_str;
             };
 
