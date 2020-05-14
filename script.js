@@ -201,23 +201,6 @@ class Scene {
             }
         }
 
-        /*
-        for ( let i = 0; i < this.cells.length; i++ ) {
-            let s = this.cells[i];
-            // decide if the shape is a rect or circle
-            if (mx > s.x && mx < s.x + CELL_WIDTH && my > s.y && my < s.y + CELL_HEIGHT) {
-                this.dragok = true;
-                s.isDragging = true;
-
-                // Check which cell was selected
-                if (mx < s.x + CELL_WIDTH/2)
-                    this.selected = [i, true];
-                else
-                    this.selected = [i, false];
-            }
-        }
-        */
-
         // save the current mouse position
         this.startX=mx;
         this.startY=my;
@@ -241,27 +224,30 @@ class Scene {
             // Get cell ended at
             let [cell, _] = this.getCellAt(mx, my);
 
-            // Update line ending info
-            line.x1 = mx;
-            line.y1 = my;
-            line.to = cell.name;
+            if (cell) {
+                // Update line ending info
+                line.x1 = mx;
+                line.y1 = my;
+                line.to = cell.name;
 
-            // Finally update reference name in starting cell
-            let from_cell = this.context[ line.from ];
-            if ( line.from_is_car )
-                from_cell.car = cell.name;
-            else
-                from_cell.cdr = cell.name;
+                // Finally update reference name in starting cell
+                let from_cell = this.context[ line.from ];
+                if ( line.from_is_car )
+                    from_cell.car = cell.name;
+                else
+                    from_cell.cdr = cell.name;
 
-            // Redraw
-            this.draw();
+                // Redraw
+                this.draw();
+            }
+            else {
+                // Remove the line started by the down click
+                this.cells.pop();
+            }
         }
         else {
             // clear all the dragging flags
             this.dragok = false;
-
-            for ( let c of this.cells )
-                c.isDragging=false;
         }
     }
 
@@ -283,17 +269,6 @@ class Scene {
             var dx=mx - this.startX;
             var dy=my - this.startY;
 
-            // move each rect that isDragging
-            // by the distance the mouse has moved
-            // since the last mousemove
-            /*
-            for ( const s of this.cells ) {
-                if(s.isDragging){
-                    s.x+=dx;
-                    s.y+=dy;
-                }
-            }
-            */
             const cell_name = this.selected[0];
             let cell = this.context[ cell_name ];
             if ( cell ) {
@@ -325,22 +300,3 @@ class Scene {
         }
     }
 }
-
-// draw a single rect
-/*
-function rect(r) {
-    ctx.fillStyle=r.fill;
-    ctx.fillRect(r.x,r.y,r.width,r.height);
-}
-*/
-
-// draw a single rect
-/*
-function circle(c) {
-    ctx.fillStyle=c.fill;
-    ctx.beginPath();
-    ctx.arc(c.x,c.y,c.r,0,Math.PI*2);
-    ctx.closePath();
-    ctx.fill();
-}
-*/
