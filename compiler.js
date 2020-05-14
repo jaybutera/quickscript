@@ -15,13 +15,14 @@ function parse (expr, context) {
     if ( expr.match(/\".*\"/) )
         return expr;
     // Number literal
-    else if ( !expr.match(/[a-zA-Z]/) )
+    else if ( expr.match(/[0-9]*/)[0] == expr )
         return expr;
-    // Sub-expression
+    // Sub-expression or symbol
     else {
         let v = context[expr];
         if (v) return deepCellToString(v, context);
-        else return expr;
+        // Quote a symbol
+        else return "'" + expr;
     }
 }
 
