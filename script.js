@@ -65,6 +65,16 @@ class Scene {
         };
     }
 
+    addConsCell = (x, y, car="", cdr="nil") => {
+        let c = newConsCell(x, y, car, car);
+
+        this.cells.push(c);
+        this.context[c.name] = c;
+
+        // Redraw
+        this.draw();
+    };
+
     setCellValue = (v) => {
         let [name, is_car] = this.selected;
         let c = this.context[name];
@@ -80,19 +90,39 @@ class Scene {
     }
 
     drawCons = (cons) => {
-        this.ctx.fillStyle = 'green';
+        // Draw cell rectangle
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 0;
+        this.ctx.shadowBlur = 0;
+        this.ctx.fillStyle = '#C0C0C0';
         this.ctx.fillRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.strokeRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
+
+        // Center divider line
+        this.ctx.beginPath();
+        this.ctx.moveTo(cons.x+CELL_WIDTH/2, cons.y);
+        this.ctx.lineTo(cons.x+CELL_WIDTH/2, cons.y+CELL_HEIGHT);
+        this.ctx.stroke();
 
         // Write data on cell
-        this.ctx.fillText(cons.car, cons.x+10, cons.y);
-        this.ctx.fillText(cons.cdr, cons.x+60, cons.y);
+        const offset = 6;
+        this.ctx.fillStyle = '#272727';
+        this.ctx.font = '18px Helvetica';
+        this.ctx.shadowOffsetX = 1;
+        this.ctx.shadowOffsetY = 1;
+        this.ctx.shadowBlur = 2;
+        this.ctx.shadowColor = "#999999";
+        this.ctx.fillText(cons.car, cons.x+offset, cons.y+CELL_HEIGHT-offset);
+        this.ctx.fillText(cons.cdr, cons.x+(CELL_WIDTH/2)+offset, cons.y+CELL_HEIGHT-offset);
     }
 
     drawLine = (l) => {
+        this.ctx.strokeStyle = '#111111';
         this.ctx.beginPath();
         this.ctx.moveTo(l.x0, l.y0);
         this.ctx.lineTo(l.x1, l.y1);
-        this.ctx.closePath();
         this.ctx.stroke();
     }
 
@@ -129,17 +159,16 @@ class Scene {
         this.clear();
 
         // redraw each shape in the shapes[] array
-        for ( const c of this.cells ) {
+        this.cells
+            .filter( e => e.type == 'line')
+            .forEach( c => this.drawLine(c) );
+        this.cells
+            .filter( e => e.type == 'cons')
+            .forEach( c => this.drawCons(c) );
+        /*
+        for ( const c of this.cells )
             this.type_map[ c.type ](c);
-            //this.drawCons( c );
-            /*
-            if(shapes[i].width){
-                rect(shapes[i]);
-            }else{
-                circle(shapes[i]);
-            };
-            */
-        }
+        */
     }
 
 

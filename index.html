@@ -7,6 +7,7 @@
                 padding: 0px;
             }
         </style>
+        <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body data-rsssl=1>
         <canvas id="myCanvas" width="700" height="400"></canvas>
@@ -15,6 +16,7 @@
 
         <input type="text" id="var-name">
         <input type="submit" id="submit-name" value="submit">
+        <input type="submit" id="new-cons" value="+">
         <input type="submit" id="new-connect" value="->">
         <br />
         <br />
@@ -46,6 +48,9 @@
             };
 
             document.getElementById('new-connect').onclick = () => { scene.connecting = true; };
+            document.getElementById('new-cons').onclick = () => {
+                scene.addConsCell(10,10);
+            }
             // an array of objects that define different shapes
             //var shapes=[];
             // define 2 rectangles
