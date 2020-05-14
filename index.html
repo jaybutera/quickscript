@@ -11,9 +11,12 @@
     <body data-rsssl=1>
         <canvas id="myCanvas" width="578" height="200"></canvas>
         <script src = "script.js"></script>
+        <script src = "compiler.js"></script>
 
         <input type="text" id="var-name">
         <input type="submit" id="submit-name" value="submit">
+        <input type="submit" id="compile" value="compile">
+        <textarea id="lisp-code"></textarea>
 
         <script>
             var canvas = document.getElementById('myCanvas');
@@ -29,6 +32,12 @@
 
             document.getElementById('submit-name').onclick = () => scene.setCellValue(
                 document.getElementById('var-name').value );
+
+            document.getElementById('compile').onclick = () => {
+                let src_cell = cells[ scene.selected[0] ];
+                let code_str = compile(src_cell, cells)
+                document.getElementById('lisp-code').value = code_str;
+            };
             // an array of objects that define different shapes
             //var shapes=[];
             // define 2 rectangles
