@@ -91,9 +91,11 @@ class Scene {
 
     drawCons = (cons) => {
         // Draw cell rectangle
+        /*
         this.ctx.shadowOffsetX = 0;
         this.ctx.shadowOffsetY = 0;
         this.ctx.shadowBlur = 0;
+        */
         this.ctx.fillStyle = '#4ed39e';
         this.ctx.fillRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
         this.ctx.lineWidth = .5;
@@ -110,10 +112,12 @@ class Scene {
         const offset = 6;
         this.ctx.fillStyle = '#272727';
         this.ctx.font = '18px Helvetica';
+        /*
         this.ctx.shadowOffsetX = 1;
         this.ctx.shadowOffsetY = 1;
         this.ctx.shadowBlur = 2;
         this.ctx.shadowColor = "#999999";
+        */
         this.ctx.fillText(cons.car, cons.x+offset, cons.y+CELL_HEIGHT-offset);
         this.ctx.fillText(cons.cdr, cons.x+(CELL_WIDTH/2)+offset, cons.y+CELL_HEIGHT-offset);
     }
@@ -124,6 +128,26 @@ class Scene {
         this.ctx.moveTo(l.x0, l.y0);
         this.ctx.lineTo(l.x1, l.y1);
         this.ctx.stroke();
+    }
+
+    drawSelected = () => {
+        const cell = this.context[ this.selected[0] ];
+        const is_car = this.selected[1];
+
+        this.ctx.fillStyle = '#5df4cc';
+        if ( is_car )
+            this.ctx.fillRect(cell.x, cell.y, CELL_WIDTH/2, CELL_HEIGHT);
+        else
+            this.ctx.fillRect(cell.x+CELL_WIDTH/2, cell.y, CELL_WIDTH/2, CELL_HEIGHT);
+
+        let offset = 6;
+        this.ctx.fillStyle = '#272727';
+        this.ctx.fillText(cell.car, cell.x+offset, cell.y+CELL_HEIGHT-offset);
+        this.ctx.fillText(cell.cdr, cell.x+(CELL_WIDTH/2)+offset, cell.y+CELL_HEIGHT-offset);
+
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = '#000000';
+        this.ctx.strokeRect(cell.x, cell.y, CELL_WIDTH, CELL_HEIGHT);
     }
 
     getCellAt = (mx, my) => {
@@ -165,6 +189,7 @@ class Scene {
         this.cells
             .filter( e => e.type == 'cons')
             .forEach( c => this.drawCons(c) );
+        this.drawSelected();
         /*
         for ( const c of this.cells )
             this.type_map[ c.type ](c);
@@ -200,6 +225,8 @@ class Scene {
                     this.selected = [clicked_cell.name, false];
             }
         }
+
+        this.draw();
 
         // save the current mouse position
         this.startX=mx;
