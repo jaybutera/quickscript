@@ -66,7 +66,7 @@ class Scene {
     }
 
     addConsCell = (x, y, car="", cdr="nil") => {
-        let c = newConsCell(x, y, car, car);
+        let c = newConsCell(x, y, car, cdr);
 
         this.cells.push(c);
         this.context[c.name] = c;
@@ -94,10 +94,10 @@ class Scene {
         this.ctx.shadowOffsetX = 0;
         this.ctx.shadowOffsetY = 0;
         this.ctx.shadowBlur = 0;
-        this.ctx.fillStyle = '#C0C0C0';
+        this.ctx.fillStyle = '#4ed39e';
         this.ctx.fillRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = "#000000";
+        this.ctx.lineWidth = .5;
+        this.ctx.strokeStyle = "#333333";
         this.ctx.strokeRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
 
         // Center divider line
