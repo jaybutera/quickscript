@@ -75,6 +75,30 @@ class Scene {
         this.draw();
     };
 
+    removeConsCell = (name) => {
+        let cell = this.context[name];
+
+        if ( cell ) {
+            // Remove from context
+            delete this.context[name];
+            // Remove from cells list
+            const i = this.cells.indexOf( cell );
+            this.cells.splice(i, 1);
+            // Remove associated connections
+            //this.cells.filter( c => c.type == 'line' && (c.from == name || c.to == name));
+            this.cells.forEach ( (c, i) => {
+                if ( c.type == 'line' && (c.from == name || c.to == name) )
+                    this.cells.splice(i, 1);
+            });
+
+            // Change selected to base
+            this.selected = undefined;// ["", true];
+
+            // Redraw
+            this.draw();
+        }
+    };
+
     setCellValue = (v) => {
         let [name, is_car] = this.selected;
         let c = this.context[name];
@@ -131,11 +155,13 @@ class Scene {
     }
 
     drawSelected = () => {
+        if ( !this.selected ) return
+
         const cell = this.context[ this.selected[0] ];
         const is_car = this.selected[1];
 
         this.ctx.fillStyle = '#5df4cc';
-        if ( is_car )
+        if ( cell && is_car )
             this.ctx.fillRect(cell.x, cell.y, CELL_WIDTH/2, CELL_HEIGHT);
         else
             this.ctx.fillRect(cell.x+CELL_WIDTH/2, cell.y, CELL_WIDTH/2, CELL_HEIGHT);

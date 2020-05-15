@@ -18,11 +18,12 @@
         <input type="text" id="var-name">
         <input type="submit" id="submit-name" value="submit">
         <input type="submit" id="new-cons" value="+">
+        <input type="submit" id="remove-cons" value="-">
         <input type="submit" id="new-connect" value="->">
         <br />
         <br />
         <input type="submit" id="compile" value="compile">
-        <br /> 
+        <br />
         <textarea id="lisp-code"></textarea>
 
         <script>
@@ -51,6 +52,9 @@
             document.getElementById('new-connect').onclick = () => { scene.connecting = true; };
             document.getElementById('new-cons').onclick = () => {
                 scene.addConsCell(10,10);
+            }
+            document.getElementById('remove-cons').onclick = () => {
+                scene.removeConsCell( scene.selected[0] );
             }
             // an array of objects that define different shapes
             //var shapes=[];
