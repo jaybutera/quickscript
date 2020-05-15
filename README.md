@@ -22,4 +22,8 @@ require the same syntactic setup no matter the scope of the work. It's arduous
 and requires a keyboard for all that typing. But with macros that can be
 abstracted away into clean looking data structures.
 
+Furthermore, I want to be coding from my phone where I can use my fingers and
+interact more naturally with the environment. Again I think a mouse here is an
+obstruction to a natural flow in this type of programming environment.
+
 ![defun id example](https://github.com/jaybutera/quickscript/blob/master/media/id_screenshot.png)
