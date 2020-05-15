@@ -234,7 +234,7 @@ class Scene {
         this.handleDownEvent(mx, my);
     }
 
-    touchUpEvent = (e) => {
+    touchDownEvent = (e) => {
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();
