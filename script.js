@@ -222,24 +222,38 @@ class Scene {
         */
     }
 
-
-    // handle mousedown events
-    myDown = (e) => {
+    mouseDownEvent = (e) => {
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
 
-        // get the current mouse position
-        var mx=parseInt(e.clientX - this.offsetX);
-        var my=parseInt(e.clientY - this.offsetY);
+        // Current mouse position
+        let mx = parseInt(e.clientX - this.offsetX);
+        let my = parseInt(e.clientY - this.offsetY);
 
+        this.handleDownEvent(mx, my);
+    }
+
+    touchUpEvent = (e) => {
+        // tell the browser we're handling this touch event
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Just take the first, no multitouch here
+        let touch = e.changedTouches[0];
+
+        this.handleDownEvent(touch.pageX, touch.pageY);
+    }
+
+    // handle mousedown events
+    handleDownEvent = (x, y) => {
         this.dragok = false;
 
-        let [clicked_cell, is_car] = this.getCellAt(mx, my);
+        let [clicked_cell, is_car] = this.getCellAt(x, y);
 
         if (clicked_cell) {
             if (this.connecting) {
-                this.cells.push( newLine(mx,my,mx,my, clicked_cell.name, is_car) );
+                this.cells.push( newLine(x,y,x,y, clicked_cell.name, is_car) );
             }
             else {
                 this.dragok = true;
@@ -255,32 +269,46 @@ class Scene {
         this.draw();
 
         // save the current mouse position
-        this.startX=mx;
-        this.startY=my;
+        this.startX=x;
+        this.startY=y;
     }
 
-
-    // handle mouseup events
-    myUp = (e) => {
+    mouseUpEvent = (e) => {
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
 
+        // Current mouse position
+        let mx = parseInt(e.clientX - this.offsetX);
+        let my = parseInt(e.clientY - this.offsetY);
+
+        this.handleUpEvent(mx, my);
+    }
+
+    touchUpEvent = (e) => {
+        // tell the browser we're handling this touch event
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Just take the first, no multitouch here
+        let touch = e.changedTouches[0];
+
+        this.handleUpEvent(touch.pageX, touch.pageY);
+    }
+
+    // handle mouseup events
+    handleUpEvent = (x, y) => {
         if (this.connecting) {
             this.connecting = false;
             let line = this.cells[ this.cells.length-1 ];
 
-            // Current mouse position
-            let mx = parseInt(e.clientX - this.offsetX);
-            let my = parseInt(e.clientY - this.offsetY);
-
             // Get cell ended at
-            let [cell, _] = this.getCellAt(mx, my);
+            let [cell, _] = this.getCellAt(x, y);
 
             if ( cell ) {
                 // Update line ending info
-                line.x1 = mx;
-                line.y1 = my;
+                line.x1 = x;
+                line.y1 = y;
                 line.to = cell.name;
 
                 // Finally update reference name in starting cell
@@ -309,21 +337,38 @@ class Scene {
 
 
     // handle mouse moves
-    myMove = (e) =>{
+    mouseMoveEvent = (e) => {
+        // tell the browser we're handling this mouse event
+        e.preventDefault();
+        e.stopPropagation();
+
+        // get the current mouse position
+        let mx = parseInt(e.clientX - this.offsetX);
+        let my = parseInt(e.clientY - this.offsetY);
+
+        this.handleMoveEvent(mx, my);
+    }
+
+    // Handle touch move event
+    touchMoveEvent = (e) => {
+        // tell the browser we're handling this touch event
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Just take the first, no multitouch here
+        let touch = e.changedTouches[0];
+
+        this.handleMoveEvent(touch.pageX, touch.pageY);
+    }
+
+    // Generic mouse handler for both mouse and touch
+    // Just takes a new position
+    handleMoveEvent = (x,y) => {
         // if we're dragging anything...
         if (this.dragok) {
-            // tell the browser we're handling this mouse event
-            e.preventDefault();
-            e.stopPropagation();
-
-            // get the current mouse position
-            var mx=parseInt(e.clientX - this.offsetX);
-            var my=parseInt(e.clientY - this.offsetY);
-
-            // calculate the distance the mouse has moved
-            // since the last mousemove
-            var dx=mx - this.startX;
-            var dy=my - this.startY;
+            // calculate distance since the last move
+            let dx = x - this.startX;
+            let dy = y - this.startY;
 
             const cell_name = this.selected[0];
             let cell = this.context[ cell_name ];
@@ -350,8 +395,8 @@ class Scene {
             this.draw();
 
             // reset the starting mouse position for the next mousemove
-            this.startX=mx;
-            this.startY=my;
+            this.startX=x;
+            this.startY=y;
 
         }
     }

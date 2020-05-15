@@ -58,12 +58,14 @@
             }
 
             // listen for mouse events
-            canvas.onmousedown = scene.myDown;
-            canvas.onmouseup = scene.myUp;
-            canvas.onmousemove = scene.myMove;
-            canvas.addEventListener('touchstart', scene.myDown);
-            canvas.addEventListener('touchend', scene.myUp);
-            canvas.addEventListener('touchmove', scene.myMove);
+            canvas.onmousedown = scene.mouseDownEvent;
+            canvas.onmouseup = scene.mouseUpEvent;
+            canvas.onmousemove = scene.mouseMoveEvent;
+/*
+            canvas.addEventListener('touchstart', scene.touchDownEvent);
+            canvas.addEventListener('touchend', scene.touchUpEvent);
+            canvas.addEventListener('touchmove', scene.touchMoveEvent);
+            */
             /*
             canvas.ontouchdown = scene.myDown;
             canvas.ontouchup = scene.myUp;
