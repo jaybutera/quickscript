@@ -277,7 +277,7 @@ class Scene {
             // Get cell ended at
             let [cell, _] = this.getCellAt(mx, my);
 
-            if (cell) {
+            if ( cell ) {
                 // Update line ending info
                 line.x1 = mx;
                 line.y1 = my;
@@ -285,7 +285,9 @@ class Scene {
 
                 // Finally update reference name in starting cell
                 let from_cell = this.context[ line.from ];
-                if ( line.from_is_car )
+                if ( line.from == '' )
+                    this.cells.pop();
+                else if ( line.from_is_car )
                     from_cell.car = cell.name;
                 else
                     from_cell.cdr = cell.name;
@@ -294,6 +296,7 @@ class Scene {
                 this.draw();
             }
             else {
+                // Didn't end at a cell
                 // Remove the line started by the down click
                 this.cells.pop();
             }
