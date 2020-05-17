@@ -23,6 +23,17 @@ function newConsCell (x, y, car="", cdr="nil", name=genConsName()) {
     }
 }
 
+function newList (x, y, elems=[], name=genConsName()) {
+    return {
+        type: 'list',
+        name: name,
+        elems: elems,
+        x: x,
+        y: y,
+        isDragging: false,
+    }
+}
+
 function newLine (x0,y0,x1,y1, from="", from_is_car=false, to="") {
     return {
         type: 'line',
@@ -62,6 +73,7 @@ class Scene {
         this.type_map = {
             'cons': this.drawCons,
             'line': this.drawLine,
+            'list': this.drawList,
         };
     }
 
@@ -75,7 +87,7 @@ class Scene {
         this.draw();
     };
 
-    removeConsCell = (name) => {
+    removeCell = (name) => {
         let cell = this.context[name];
 
         if ( cell ) {
@@ -85,11 +97,12 @@ class Scene {
             const i = this.cells.indexOf( cell );
             this.cells.splice(i, 1);
             // Remove associated connections
-            //this.cells.filter( c => c.type == 'line' && (c.from == name || c.to == name));
-            this.cells.forEach ( (c, i) => {
+            for ( let i = this.cells.length-1; i >= 0; i--) {
+                let c = this.cells[i];
+
                 if ( c.type == 'line' && (c.from == name || c.to == name) )
                     this.cells.splice(i, 1);
-            });
+            }
 
             // Change selected to base
             this.selected = undefined;// ["", true];
