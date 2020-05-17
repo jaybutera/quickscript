@@ -223,7 +223,7 @@ class Scene {
     }
 
     mouseDownEvent = (e) => {
-        //document.getElementById('debug').innerText = "mouse down";
+        document.getElementById('debug').innerText = "mouse down";
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
@@ -236,7 +236,7 @@ class Scene {
     }
 
     touchDownEvent = (e) => {
-        //document.getElementById('debug').innerText = "touch down";
+        document.getElementById('debug').innerText = "touch down";
 
         // tell the browser we're handling this touch event
         e.preventDefault();
