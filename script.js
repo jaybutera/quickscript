@@ -1,4 +1,4 @@
-const CELL_WIDTH = 100;
+const CELL_WIDTH = 50;
 const CELL_HEIGHT = 30;
 
 // An algorithmic global name generator
@@ -11,40 +11,29 @@ function genConsName() {
 }
 
 // If no name is given, algorithmically assign one
-function newConsCell (x, y, car="", cdr="nil", name=genConsName()) {
-    return {
-        type: 'cons',
-        name: name,
-        car: car,
-        cdr: cdr,
-        x: x,
-        y: y,
-        isDragging: false,
-    }
-}
-
-function newList (x, y, elems=[], name=genConsName()) {
+function newList (x, y, elems=['nil'], name=genConsName()) {
     return {
         type: 'list',
         name: name,
-        elems: elems,
         x: x,
         y: y,
+        elems: elems,
         isDragging: false,
     }
 }
 
-function newLine (x0,y0,x1,y1, from="", from_is_car=false, to="") {
+function newLine (x0,y0,x1,y1, from="", from_index=0, to="") {
     return {
         type: 'line',
         from: from, // name of object the line starts from
         to: to,
-        from_is_car: from_is_car,
+        from_index: from_index,
+        //from_is_car: from_is_car,
         x0: x0,
         y0: y0,
         x1: x1,
         y1: y1,
-    };
+    }
 }
 
 class Scene {
@@ -70,22 +59,24 @@ class Scene {
         this.context = {};
         cells.forEach( c => { this.context[ c.name ] = c });
 
+        /*
         this.type_map = {
             'cons': this.drawCons,
             'line': this.drawLine,
             'list': this.drawList,
         };
+        */
     }
 
-    addConsCell = (x, y, car="", cdr="nil") => {
-        let c = newConsCell(x, y, car, cdr);
+    addList = (x, y, elems=['nil']) => {
+        let c = newList(x, y, elems);
 
         this.cells.push(c);
         this.context[c.name] = c;
 
         // Redraw
         this.draw();
-    };
+    }
 
     removeCell = (name) => {
         let cell = this.context[name];
@@ -105,58 +96,48 @@ class Scene {
             }
 
             // Change selected to base
-            this.selected = undefined;// ["", true];
+            this.selected = undefined;
 
             // Redraw
             this.draw();
         }
-    };
+    }
 
     setCellValue = (v) => {
-        let [name, is_car] = this.selected;
+        let [name, index] = this.selected;
         let c = this.context[name];
         console.log(c);
 
-        if ( is_car )
-            c.car = v;
-        else
-            c.cdr = v;
+        c.elems[index] = v;
 
         // Redraw
         this.draw();
     }
 
-    drawCons = (cons) => {
-        // Draw cell rectangle
-        /*
-        this.ctx.shadowOffsetX = 0;
-        this.ctx.shadowOffsetY = 0;
-        this.ctx.shadowBlur = 0;
-        */
+    drawList = (cell) => {
+        const rect_len = CELL_WIDTH * cell.elems.length;
+
+        // Draw rectangle
         this.ctx.fillStyle = '#4ed39e';
-        this.ctx.fillRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
+        this.ctx.fillRect(cell.x, cell.y, rect_len, CELL_HEIGHT);
         this.ctx.lineWidth = .5;
         this.ctx.strokeStyle = "#333333";
-        this.ctx.strokeRect(cons.x, cons.y, CELL_WIDTH, CELL_HEIGHT);
+        this.ctx.strokeRect(cell.x, cell.y, rect_len, CELL_HEIGHT);
 
-        // Center divider line
-        this.ctx.beginPath();
-        this.ctx.moveTo(cons.x+CELL_WIDTH/2, cons.y);
-        this.ctx.lineTo(cons.x+CELL_WIDTH/2, cons.y+CELL_HEIGHT);
-        this.ctx.stroke();
+        for ( let i = 0; i < cell.elems.length; i++) {
+            const x_offset = CELL_WIDTH * i;
+            // Divider line
+            this.ctx.beginPath();
+            this.ctx.moveTo(cell.x + x_offset, cell.y);
+            this.ctx.lineTo(cell.x + x_offset, cell.y+CELL_HEIGHT);
+            this.ctx.stroke();
 
-        // Write data on cell
-        const offset = 6;
-        this.ctx.fillStyle = '#272727';
-        this.ctx.font = '18px Helvetica';
-        /*
-        this.ctx.shadowOffsetX = 1;
-        this.ctx.shadowOffsetY = 1;
-        this.ctx.shadowBlur = 2;
-        this.ctx.shadowColor = "#999999";
-        */
-        this.ctx.fillText(cons.car, cons.x+offset, cons.y+CELL_HEIGHT-offset);
-        this.ctx.fillText(cons.cdr, cons.x+(CELL_WIDTH/2)+offset, cons.y+CELL_HEIGHT-offset);
+            // Write data on cell
+            const offset = 6;
+            this.ctx.fillStyle = '#272727';
+            this.ctx.font = '18px Helvetica';
+            this.ctx.fillText(cell.elems[i], cell.x + offset + x_offset, cell.y+CELL_HEIGHT-offset);
+        }
     }
 
     drawLine = (l) => {
@@ -168,49 +149,48 @@ class Scene {
     }
 
     drawSelected = () => {
-        if ( !this.selected ) return
+        if ( !this.selected ) return;
 
         const cell = this.context[ this.selected[0] ];
-        const is_car = this.selected[1];
+        //const is_car = this.selected[1];
+        const index = this.selected[1];
 
+        // Highlight specific cell
+        const cx = CELL_WIDTH * index;
         this.ctx.fillStyle = '#5df4cc';
-        if ( cell && is_car )
-            this.ctx.fillRect(cell.x, cell.y, CELL_WIDTH/2, CELL_HEIGHT);
-        else
-            this.ctx.fillRect(cell.x+CELL_WIDTH/2, cell.y, CELL_WIDTH/2, CELL_HEIGHT);
+        this.ctx.fillRect(cell.x + cx, cell.y, CELL_WIDTH, CELL_HEIGHT);
 
+        // Rewrite text
         let offset = 6;
         this.ctx.fillStyle = '#272727';
-        this.ctx.fillText(cell.car, cell.x+offset, cell.y+CELL_HEIGHT-offset);
-        this.ctx.fillText(cell.cdr, cell.x+(CELL_WIDTH/2)+offset, cell.y+CELL_HEIGHT-offset);
+        for ( let i = 0; i < cell.elems.length; i++)
+            this.ctx.fillText(cell.elems[i], cell.x + offset + CELL_WIDTH*i, cell.y+CELL_HEIGHT-offset);
 
+        // Border whole box
         this.ctx.lineWidth = 1;
         this.ctx.strokeStyle = '#000000';
-        this.ctx.strokeRect(cell.x, cell.y, CELL_WIDTH, CELL_HEIGHT);
+        this.ctx.strokeRect(cell.x, cell.y, CELL_WIDTH * cell.elems.length, CELL_HEIGHT);
     }
 
     getCellAt = (mx, my) => {
         let cell = this.cells
-            .filter( c => c.type == 'cons' )
+            .filter( c => c.type == 'list' )
             .find( c => {
-                return mx > c.x && mx < c.x + CELL_WIDTH
+                return mx > c.x && mx < c.x + (CELL_WIDTH * c.elems.length)
                     && my > c.y && my < c.y + CELL_HEIGHT;
             });
 
-        let is_car = false;
+        //let is_car = false;
         // Either car or cdr side was clicked
-        if (cell && mx < cell.x + CELL_WIDTH/2)
-            is_car = true;
+        //if (cell && mx < cell.x + CELL_WIDTH/2)
+        //    is_car = true;
 
-        return [cell, is_car];
-    }
+        let cell_num = 0;
+        if ( cell )
+            cell_num = Math.floor( (mx - cell.x) / CELL_WIDTH );
 
-    /*
-    getMousePos = () => {
-        return [parseInt(e.clientX - this.offsetX),
-                parseInt(e.clientY - this.offsetY)];
+        return [cell, cell_num];
     }
-    */
 
     // clear the canvas
     clear = () => {
@@ -226,13 +206,11 @@ class Scene {
             .filter( e => e.type == 'line')
             .forEach( c => this.drawLine(c) );
         this.cells
-            .filter( e => e.type == 'cons')
-            .forEach( c => this.drawCons(c) );
+            .filter( e => e.type == 'list')
+            .forEach( c => this.drawList(c) );
         this.drawSelected();
-        /*
-        for ( const c of this.cells )
-            this.type_map[ c.type ](c);
-        */
+        //for ( const c of this.cells )
+        //    this.type_map[ c.type ](c);
     }
 
     mouseDownEvent = (e) => {
@@ -265,20 +243,17 @@ class Scene {
     handleDownEvent = (x, y) => {
         this.dragok = false;
 
-        let [clicked_cell, is_car] = this.getCellAt(x, y);
+        let [clicked_cell, index] = this.getCellAt(x, y);
 
         if (clicked_cell) {
             if (this.connecting) {
-                this.cells.push( newLine(x,y,x,y, clicked_cell.name, is_car) );
+                this.cells.push( newLine(x,y,x,y, clicked_cell.name, index) );
             }
             else {
                 this.dragok = true;
                 clicked_cell.isDragging = true;
 
-                if (is_car)
-                    this.selected = [clicked_cell.name, true];
-                else
-                    this.selected = [clicked_cell.name, false];
+                this.selected = [clicked_cell.name, index];
             }
         }
 
@@ -331,10 +306,8 @@ class Scene {
                 let from_cell = this.context[ line.from ];
                 if ( line.from == '' )
                     this.cells.pop();
-                else if ( line.from_is_car )
-                    from_cell.car = cell.name;
                 else
-                    from_cell.cdr = cell.name;
+                    from_cell.elems[ line.from_index ] = cell.name;
 
                 // Redraw
                 this.draw();

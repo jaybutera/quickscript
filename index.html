@@ -12,11 +12,13 @@
     </head>
     <body data-rsssl=1>
         <canvas id="myCanvas" width="700" height="400"></canvas>
+
         <script src = "script.js"></script>
         <script src = "compiler.js"></script>
 
         <input type="text" id="var-name">
         <input type="submit" id="submit-name" value="submit">
+        <input type="text"   id="list-size">
         <input type="submit" id="new-cons" value="+">
         <input type="submit" id="remove-cons" value="-">
         <input type="submit" id="new-connect" value="->">
@@ -28,12 +30,18 @@
         <textarea id="debug"></textarea>
 
         <script>
-            var canvas = document.getElementById('myCanvas');
-            var ctx = canvas.getContext('2d');
+            const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+            const height = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+            const UI_height = height / 3;
+
+            let canvas = document.getElementById('myCanvas');
+            canvas.width = width;
+            canvas.height = height - UI_height;
+            let ctx = canvas.getContext('2d');
 
             let cells = [
-                newConsCell(10, 50),
-                newConsCell(10, 100),
+                newList(10, 50, ['hello', 'world', 'nil']),
+                newList(10, 100),
             ];
 
             let scene = new Scene(canvas, ctx, cells);
@@ -44,7 +52,7 @@
 
             document.getElementById('compile').onclick = () => {
                 let src_cell = scene.context[ scene.selected[0] ];
-                let cons_list = cells.filter( c => c.type == 'cons');
+                let cons_list = cells.filter( c => c.type == 'list');
 
                 let code_str = compile(src_cell, cons_list);
                 document.getElementById('lisp-code').value = code_str;
@@ -52,10 +60,12 @@
 
             document.getElementById('new-connect').onclick = () => { scene.connecting = true; };
             document.getElementById('new-cons').onclick = () => {
-                scene.addConsCell(10,10);
+                let size = parseInt( document.getElementById('list-size').value );
+                let l = Array.apply(null, Array(size)).map( _ => '');
+                scene.addList(10,10, l);
             }
             document.getElementById('remove-cons').onclick = () => {
-                scene.removeConsCell( scene.selected[0] );
+                scene.removeCell( scene.selected[0] );
             }
 
             // listen for mouse events
@@ -67,7 +77,7 @@
             canvas.addEventListener('touchend', scene.touchUpEvent);
             canvas.addEventListener('touchmove', scene.touchMoveEvent);
 
-            // call to draw the scene
+            // call to draw the scene initially
             scene.draw();
         </script>
     </body>
