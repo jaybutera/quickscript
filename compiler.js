@@ -1,17 +1,15 @@
 function cellToString (cell) {
-    return '(cons ' + cell.car + ' ' + cell.cdr + ')';
+    return '(' + cell.elems.join(' ') + ')';
 }
 
 function deepCellToString (cell, context) {
-    console.log(cell)
-    let car = parse( cell.car, context );
-    let cdr = parse( cell.cdr, context );
-
-    return '(cons ' + car + ' ' + cdr + ')';
+    let deepElems = cell.elems.map( e => parse(e, context) );
+    return '(' + deepElems.join(' ') + ')';
 }
 
 function parse (expr, context) {
     // String literal
+    console.log(expr)
     if ( expr.match(/\".*\"/) )
         return expr;
     // Number literal
@@ -21,8 +19,8 @@ function parse (expr, context) {
     else {
         let v = context[expr];
         if (v) return deepCellToString(v, context);
-        // Quote a symbol
-        else return "'" + expr;
+        // If not in the context, treat it as a symbol
+        else return expr;
     }
 }
 
