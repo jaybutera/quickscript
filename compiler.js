@@ -88,7 +88,7 @@ function eval (s_expr/*, context*/) {
     // Return function output
     const args = elems.slice(1).map( e => {
         if ( e.type == 'list' )
-            return eval(e).value;
+            return eval(e);
         else
             return e.value;
     });
