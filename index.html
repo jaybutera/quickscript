@@ -28,6 +28,12 @@
         <br />
         <textarea id="lisp-code"></textarea>
         <textarea id="debug"></textarea>
+        <br />
+
+        <h3>Context</h3>
+        <br />
+        <ul id="context">
+        </ul>
 
         <script>
             const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -46,6 +52,9 @@
 
             let scene = new Scene(canvas, ctx, cells);
 
+            // A repl context for our definitions
+            let context = {};
+
 
             document.getElementById('submit-name').onclick = () => scene.setCellValue(
                 document.getElementById('var-name').value );
@@ -54,7 +63,9 @@
                 let src_cell = scene.context[ scene.selected[0] ];
                 let cons_list = cells.filter( c => c.type == 'list');
 
-                let code_str = compile(src_cell, cons_list);
+                // Side effects in modifying context
+                let code_str = compile(src_cell, cons_list, context);
+
                 document.getElementById('lisp-code').value = code_str;
             };
 
