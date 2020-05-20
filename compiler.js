@@ -26,7 +26,7 @@ function parse (expr, context) {
 // Parses the visual structure into an AST
 // BUT, symbols are not parsed, they are left as symbols
 // This is because this context refers to the visual references, not the REPL values
-function parseToAST (expr, refs) {
+function parseToAst (expr, refs) {
     // String literal
     if ( expr.match(/\".*\"/) )
         return {
@@ -45,7 +45,7 @@ function parseToAST (expr, refs) {
         // Parse a reference recursively
         if (v) return {
             type: 'list',
-            value: v.elems.map( e => parseToAst(v, refs) ),
+            value: v.elems.map( e => parseToAst(e, refs) ),
         }
         // If not in the refs, treat it as a symbol
         else return {
@@ -86,7 +86,12 @@ function eval (s_expr/*, context*/) {
         return 'Error: first element is not a function, its a ' + f.type;
 
     // Return function output
-    const args = elems.slice(1).map( e => e.value );
+    const args = elems.slice(1).map( e => {
+        if ( e.type == 'list' )
+            return eval(e).value;
+        else
+            return e.value;
+    });
     return f.value( args );
 }
 
@@ -97,7 +102,7 @@ function compile (src_cell, cells, context) {
     //return exprAsString(src_cell, context);
     const firstAST = {
         type: 'list',
-        value: src_cell.elems.map( e => parseToAST(e, context) ),
+        value: src_cell.elems.map( e => parseToAst(e, context) ),
     };
     const AST = parseSymbols(firstAST, std_lib);
     return JSON.stringify( eval(AST, std_lib) );
@@ -108,6 +113,10 @@ const std_lib = {
     '+' : {
         type: 'lambda',
         value: ([x,y]) => x+y,
+    },
+    '-' : {
+        type: 'lambda',
+        value: ([x,y]) => x-y,
     },
 }
 
