@@ -23,8 +23,10 @@ function parse (expr, context) {
     }
 }
 
-function parseToAST (expr, context) {
-    console.log(expr)
+// Parses the visual structure into an AST
+// BUT, symbols are not parsed, they are left as symbols
+// This is because this context refers to the visual references, not the REPL values
+function parseToAST (expr, refs) {
     // String literal
     if ( expr.match(/\".*\"/) )
         return {
@@ -39,13 +41,13 @@ function parseToAST (expr, context) {
         };
     // Symbol or reference
     else {
-        let v = context[expr];
+        let v = refs[expr];
         // Parse a reference recursively
         if (v) return {
             type: 'list',
-            value: v.elems.map( e => parseToAst(v, context) ),
+            value: v.elems.map( e => parseToAst(v, refs) ),
         }
-        // If not in the context, treat it as a symbol
+        // If not in the refs, treat it as a symbol
         else return {
             type: 'symbol',
             value: expr,
@@ -53,31 +55,60 @@ function parseToAST (expr, context) {
     }
 }
 
-/*
-function exprAsString (expr, context) {
-    console.log(expr)
-    let deepElems = expr.elems.map( e => {
-        //let v = context[e];
-
-        // Sub-expression
-        if ( e.match(/\(.*\)/)[0] == e )
-            return exprAsString(e, context);
-        else
-            //return exprAsString(e, context)
-            return e;
-    });
-
-    return '(' + deepElems.join(' ') + ')';
+// Second parsing pass-through takes the AST and expands symbols given a context
+function parseSymbols (ast, context) {
+    if ( ast.type == 'list' )
+        return {
+            type: 'list',
+            value: ast.value.map( e => parseSymbols(e, context) ),
+        };
+    else if ( ast.type == 'symbol') {
+        const v = context[ ast.value ];
+        if ( !v )
+            console.log('Error: symbol was not found in context:', ast.value);
+        return v;
+    }
+    else
+        return ast;
 }
-*/
+
+function eval (s_expr/*, context*/) {
+    // Assume s_expr is a parsed AST node
+    if ( s_expr.type != 'list' )
+        return s_expr.value;
+
+    // (Lookup?) the first element
+    const elems = s_expr.value;
+    const f = elems[0];
+    if ( !f )
+        return 'Error: f is not in context';
+    if ( f.type != 'lambda' )
+        return 'Error: first element is not a function, its a ' + f.type;
+
+    // Return function output
+    const args = elems.slice(1).map( e => e.value );
+    return f.value( args );
+}
 
 function compile (src_cell, cells, context) {
     //let lexical_context = {};
     cells.forEach( c => { context[ c.name ] = c });
 
     //return exprAsString(src_cell, context);
-    let deepElems = src_cell.elems.map( e => parseToAST(e, context) );
-    return JSON.stringify( deepElems );
+    const firstAST = {
+        type: 'list',
+        value: src_cell.elems.map( e => parseToAST(e, context) ),
+    };
+    const AST = parseSymbols(firstAST, std_lib);
+    return JSON.stringify( eval(AST, std_lib) );
+    //return JSON.stringify( deepElems );
+}
+
+const std_lib = {
+    '+' : {
+        type: 'lambda',
+        value: ([x,y]) => x+y,
+    },
 }
 
 /*
