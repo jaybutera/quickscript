@@ -94,7 +94,28 @@ function std_env () {
     return std_env;
 }
 
-const global_env = std_env();
+function parseCells (expr, env) {
+    // String literal
+    if ( expr instanceof Array )
+        return expr.map( e => parseCells(e, env) );
+
+    if ( expr.match(/\".*\"/) )
+        return expr.split('"')[1];
+    // Number literal
+    //else if ( expr.match(/[0-9]*/)[0] == expr )
+    else if ( Number(expr) )
+        return Number(expr);
+    // Symbol or reference
+    else {
+        const v = env[expr];
+        // A reference is how blocks are composed in the UI
+        if (v) return v.elems.map( e => parseCells(e, env) );
+        // If v is not in env, it must be a symbol (string)
+        else return expr;
+    }
+}
+
+//const global_env = std_env();
 
 //console.log( tokenize('(test (1 2) 3)') )
 //console.log( parse('(test (1 2) 3)') )

@@ -14,7 +14,7 @@
         <canvas id="myCanvas" width="700" height="400"></canvas>
 
         <script src = "script.js"></script>
-        <script src = "compiler.js"></script>
+        <script src = "interpreter.js"></script>
 
         <input type="text" id="var-name">
         <br />
@@ -46,13 +46,15 @@
             let ctx = canvas.getContext('2d');
 
             let cells = [
-                newList(10, 50, ['+', '1', '2']),
+                newList(10, 100, ['lambda', 'x', 'x']),
+                newList(10, 50, ['+', 'x', '2']),
             ];
 
             let scene = new Scene(canvas, ctx, cells);
 
             // A repl context for our definitions
-            let context = {};
+            //let context = {};
+            let global_env = std_env();
 
 
             document.getElementById('var-name').onkeyup = () => {
@@ -64,15 +66,19 @@
                 let cons_list = cells.filter( c => c.type == 'list');
 
                 // Side effects in modifying context
-                let code_str = compile(src_cell, cons_list, context);
+                //let code_str = compile(src_cell, cons_list, context);
+
+                const result = eval(
+                    parseCells(src_cell.elems, {...new Env(), ...scene.context}),
+                    global_env);
 
                 // Output evaluation
-                document.getElementById('lisp-code').value = code_str;
+                document.getElementById('lisp-code').value = result;
 
                 // Re-print the context
                 const ul = document.getElementById('context');
                 //for (let [k,v] of Object.entries( context )) {
-                Object.keys(std_lib).forEach( k => {
+                Object.keys(global_env).forEach( k => {
                     const li = document.createElement('li');
                     li.appendChild( document.createTextNode(k) );
                     li.onclick = () => {
