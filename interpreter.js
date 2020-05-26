@@ -37,6 +37,8 @@ function atom (token) {
 }
 
 function eval (x, env) {
+    //console.log('x:', x)
+    //console.log('env:', env)
     if ( typeof(x) == 'string' ) // Symbol
         return env.find(x)[x];
     else if ( !(x instanceof Array) ) // Constant
@@ -63,6 +65,8 @@ function eval (x, env) {
     else { // Procedure call
         const proc = eval(op, env);
         const a = args.map( e => eval(e, env) );
+        console.log('proc: ', proc)
+        console.log('args: ', a)
         return proc(...a);
     }
 }
@@ -90,8 +94,21 @@ function std_env () {
     const std_env = new Env();
     std_env['+'] = (x,y) => { return x+y; };
     std_env['*'] = (x,y) => { return x*y; };
+    std_env['-'] = (x,y) => { return x-y; };
+    std_env['/'] = (x,y) => { return x/y; };
+    std_env['car'] = (l) => { console.log('l:', l); return l[0]; };
+    std_env['cdr'] = (l) => { return l.slice(1) };
+    std_env['cons'] = (h,t) => { return [h].concat(t) };
+    std_env['map'] = (l,f) => { return l.map(f) };
 
     return std_env;
+}
+
+function serialize (expr) {
+    if ( expr instanceof Array )
+        return '(' + expr.map(serialize).join(' ') + ')'
+    else
+        return String(expr)
 }
 
 function parseCells (expr, env) {
@@ -125,5 +142,12 @@ function parseCells (expr, env) {
 //console.log( eval(parse('(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))'), std_env()) )
 //console.log( eval(parse('(define circle-area (lambda (r) (* 3.14 (* r r))))'), global_env) )
 //console.log( eval(parse('(circle-area 2)'), global_env) )
+//console.log( eval(parse('(car 1 2)'), std_env()) )
+console.log( eval(parse(
+    '(map (cons 1 2) (lambda x (+ x 1)))')
+    ,std_env()) );
+
+console.log(
+    serialize(parse('(map (cons 1 2) (lambda x (+ x 1)))')))
 //while (true) {
 //}
