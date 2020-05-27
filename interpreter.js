@@ -87,6 +87,7 @@ function Procedure (params, body, env) {
     function f () {
         return eval(body, new Env(params, arguments, env));
     };
+    f.length = params.length;
     return f;
 }
 
@@ -96,7 +97,7 @@ function std_env () {
     std_env['*'] = (x,y) => { return x*y; };
     std_env['-'] = (x,y) => { return x-y; };
     std_env['/'] = (x,y) => { return x/y; };
-    std_env['car'] = (l) => { console.log('l:', l); return l[0]; };
+    std_env['car'] = (l) => { return l[0]; };
     std_env['cdr'] = (l) => { return l.slice(1) };
     std_env['cons'] = (h,t) => { return [h].concat(t) };
     std_env['map'] = (l,f) => { return l.map(f) };
@@ -147,7 +148,9 @@ console.log( eval(parse(
     '(map (cons 1 2) (lambda x (+ x 1)))')
     ,std_env()) );
 
+/*
 console.log(
     serialize(parse('(map (cons 1 2) (lambda x (+ x 1)))')))
+*/
 //while (true) {
 //}

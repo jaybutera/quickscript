@@ -1,3 +1,10 @@
 body {
     background-color: #EBEBEB;
 }
+
+#draggable {
+    width: 100px;
+    height: 20px;
+    text-align: center;
+    background: blue;
+}

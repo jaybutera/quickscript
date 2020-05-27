@@ -36,6 +36,30 @@ function newLine (x0,y0,x1,y1, from="", from_index=0, to="") {
     }
 }
 
+function fromAST (expr) {
+    if ( expr instanceof Array ) {
+        // Push the current expr
+        let l = [ newList(10,10,expr) ];
+
+        // Push sub-exprs
+        l.concat(
+            expr.filter( e => { return e instanceof Array })
+                .map( e => { return fromAST(e) })
+        );
+        // Generate lines from cells
+        const lines = l.map( v => { return newLine(
+            l[0].x, l[0].y,
+            v.x, v.y,
+            l[0].name, l. v.name)
+        });
+
+        return [l, lines];
+    }
+
+    // Only care about cells
+    else return null
+}
+
 class Scene {
     constructor(canvas, ctx, cells) {
         this.ctx = ctx;
@@ -51,7 +75,7 @@ class Scene {
         this.startY;
 
         // Scene state
-        this.selected = [cells ? cells[0].name : "", false];
+        this.selected = cells.length < 1 ? cells[0].name : null;
         this.cells = cells;
         this.connecting = false;
 
@@ -179,11 +203,6 @@ class Scene {
                 return mx > c.x && mx < c.x + (CELL_WIDTH * c.elems.length)
                     && my > c.y && my < c.y + CELL_HEIGHT;
             });
-
-        //let is_car = false;
-        // Either car or cdr side was clicked
-        //if (cell && mx < cell.x + CELL_WIDTH/2)
-        //    is_car = true;
 
         let cell_num = 0;
         if ( cell )
