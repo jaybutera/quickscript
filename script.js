@@ -92,7 +92,7 @@ class Scene {
         */
     }
 
-    addList = (x, y, elems=['nil']) => {
+    addList (x, y, elems=['nil']) {
         let c = newList(x, y, elems);
 
         this.cells.push(c);
@@ -102,7 +102,7 @@ class Scene {
         this.draw();
     }
 
-    removeCell = (name) => {
+    removeCell (name) {
         let cell = this.context[name];
 
         if ( cell ) {
@@ -127,7 +127,7 @@ class Scene {
         }
     }
 
-    setCellValue = (v) => {
+    setCellValue (v) {
         let [name, index] = this.selected;
         let c = this.context[name];
         console.log(c);
@@ -138,7 +138,7 @@ class Scene {
         this.draw();
     }
 
-    drawList = (cell) => {
+    drawList (cell) {
         const rect_len = CELL_WIDTH * cell.elems.length;
 
         // Draw rectangle
@@ -164,7 +164,7 @@ class Scene {
         }
     }
 
-    drawLine = (l) => {
+    drawLine (l) {
         this.ctx.strokeStyle = '#111111';
         this.ctx.beginPath();
         this.ctx.moveTo(l.x0, l.y0);
@@ -172,7 +172,7 @@ class Scene {
         this.ctx.stroke();
     }
 
-    drawSelected = () => {
+    drawSelected () {
         if ( !this.selected ) return;
 
         const cell = this.context[ this.selected[0] ];
@@ -196,7 +196,7 @@ class Scene {
         this.ctx.strokeRect(cell.x, cell.y, CELL_WIDTH * cell.elems.length, CELL_HEIGHT);
     }
 
-    getCellAt = (mx, my) => {
+    getCellAt (mx, my) {
         let cell = this.cells
             .filter( c => c.type == 'list' )
             .find( c => {
@@ -212,12 +212,12 @@ class Scene {
     }
 
     // clear the canvas
-    clear = () => {
+    clear () {
         ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     }
 
     // redraw the scene
-    draw = () => {
+    draw () {
         this.clear();
 
         // redraw each shape in the shapes[] array
@@ -232,7 +232,11 @@ class Scene {
         //    this.type_map[ c.type ](c);
     }
 
-    mouseDownEvent = (e) => {
+    thisFn () {
+        return this;
+    }
+
+    mouseDownEvent (e) {
         document.getElementById('debug').innerText = "mouse down";
         // tell the browser we're handling this mouse event
         e.preventDefault();
@@ -245,7 +249,7 @@ class Scene {
         this.handleDownEvent(mx, my);
     }
 
-    touchDownEvent = (e) => {
+    touchDownEvent (e) {
         document.getElementById('debug').innerText = "touch down";
 
         // tell the browser we're handling this touch event
@@ -259,7 +263,7 @@ class Scene {
     }
 
     // handle mousedown events
-    handleDownEvent = (x, y) => {
+    handleDownEvent (x, y) {
         this.dragok = false;
 
         let [clicked_cell, index] = this.getCellAt(x, y);
@@ -283,7 +287,7 @@ class Scene {
         this.startY=y;
     }
 
-    mouseUpEvent = (e) => {
+    mouseUpEvent (e) {
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
@@ -295,7 +299,7 @@ class Scene {
         this.handleUpEvent(mx, my);
     }
 
-    touchUpEvent = (e) => {
+    touchUpEvent (e) {
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();
@@ -307,7 +311,7 @@ class Scene {
     }
 
     // handle mouseup events
-    handleUpEvent = (x, y) => {
+    handleUpEvent (x, y) {
         if (this.connecting) {
             this.connecting = false;
             let line = this.cells[ this.cells.length-1 ];
@@ -345,7 +349,7 @@ class Scene {
 
 
     // handle mouse moves
-    mouseMoveEvent = (e) => {
+    mouseMoveEvent (e) {
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
@@ -358,7 +362,7 @@ class Scene {
     }
 
     // Handle touch move event
-    touchMoveEvent = (e) => {
+    touchMoveEvent (e) {
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();
@@ -371,7 +375,7 @@ class Scene {
 
     // Generic mouse handler for both mouse and touch
     // Just takes a new position
-    handleMoveEvent = (x,y) => {
+    handleMoveEvent (x,y) {
         // if we're dragging anything...
         if (this.dragok) {
             // calculate distance since the last move
