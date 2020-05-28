@@ -87,9 +87,22 @@ function Procedure (params, body, env) {
     function f () {
         return eval(body, new Env(params, arguments, env));
     };
-    f.length = params.length;
-    return f;
+    return setArity(params.length, f);
 }
+
+function setArity (arity, fn) {
+    if (typeof arity !== 'number')
+        throw new TypeError('Expected arity to be a number, got ' + arity);
+
+    let params = [];
+    for (var i = 0; i < arity; i++)
+        params.push('_' + i);
+
+    return new Function(
+        'fn',
+        'return function f(' + params.join(', ') + ') { return fn.apply(this, arguments); }'
+    )(fn);
+};
 
 function std_env () {
     const std_env = new Env();
@@ -133,24 +146,12 @@ function parseCells (expr, env) {
     }
 }
 
-//const global_env = std_env();
-
-//console.log( tokenize('(test (1 2) 3)') )
-//console.log( parse('(test (1 2) 3)') )
-
-//console.log( parse( '(+ 1 2)' ) )
-//console.log( eval(parse( '(+ 1 2)' ), global_env) )
-//console.log( eval(parse('(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))'), std_env()) )
-//console.log( eval(parse('(define circle-area (lambda (r) (* 3.14 (* r r))))'), global_env) )
-//console.log( eval(parse('(circle-area 2)'), global_env) )
-//console.log( eval(parse('(car 1 2)'), std_env()) )
+/*
 console.log( eval(parse(
     '(map (cons 1 2) (lambda x (+ x 1)))')
     ,std_env()) );
-
+*/
 /*
 console.log(
     serialize(parse('(map (cons 1 2) (lambda x (+ x 1)))')))
 */
-//while (true) {
-//}
