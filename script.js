@@ -314,7 +314,8 @@ class Scene {
         // Just take the first, no multitouch here
         let touch = e.changedTouches[0];
 
-        this.handleUpEvent(touch.pageX, touch.pageY);
+        //this.handleUpEvent(touch.pageX, touch.pageY);
+        this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
     }
 
     // handle mouseup events
@@ -377,7 +378,8 @@ class Scene {
         // Just take the first, no multitouch here
         let touch = e.changedTouches[0];
 
-        this.handleMoveEvent(touch.pageX, touch.pageY);
+        //this.handleMoveEvent(touch.pageX, touch.pageY);
+        this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
     }
 
     // Generic mouse handler for both mouse and touch
