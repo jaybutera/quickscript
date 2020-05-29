@@ -251,6 +251,7 @@ class Scene {
 
     touchDownEvent (e) {
         document.getElementById('debug').innerText = "touch down";
+        console.log(e.pageX, ':', e.pageY);
 
         // tell the browser we're handling this touch event
         e.preventDefault();
@@ -261,7 +262,9 @@ class Scene {
 
         //if ( e.target.className == 
         //this.handleDownEvent(touch.pageX, touch.pageY);
-        this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
+        this.handleDownEvent(
+            touch.pageX - this.offsetX,
+            touch.pageY - this.offsetY);
     }
 
     // handle mousedown events
@@ -315,7 +318,10 @@ class Scene {
         let touch = e.changedTouches[0];
 
         //this.handleUpEvent(touch.pageX, touch.pageY);
-        this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
+        //this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
+        this.handleDownEvent(
+            touch.pageX - this.offsetX,
+            touch.pageY - this.offsetY);
     }
 
     // handle mouseup events
@@ -371,6 +377,7 @@ class Scene {
 
     // Handle touch move event
     touchMoveEvent (e) {
+        document.getElementById('debug').innerText = "touch move";
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();
@@ -379,7 +386,10 @@ class Scene {
         let touch = e.changedTouches[0];
 
         //this.handleMoveEvent(touch.pageX, touch.pageY);
-        this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
+        //this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
+        this.handleMoveEvent(
+            touch.pageX - this.offsetX,
+            touch.pageY - this.offsetY);
     }
 
     // Generic mouse handler for both mouse and touch

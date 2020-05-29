@@ -13,13 +13,12 @@
     </head>
     <body data-rsssl=1>
         <div class="wrap">
-        <div class="main">
+        <div id="main">
             <canvas id="myCanvas"></canvas>
         </div>
 
         <div class="control-panel">
-            <h3 style="font-size:2vw">Context</h3>
-            <br />
+            <h3 style="font-size:3vw" align="center">Context</h3>
             <ul id="context">
             </ul>
 
@@ -102,18 +101,25 @@
             window.onorientationchange = () => {
                 fitToContainer(canvas, scene);
             }
+            window.onresize = () => {
+                fitToContainer(canvas, scene);
+            };
 
             // listen for mouse events
             canvas.onmousedown = scene.mouseDownEvent.bind(scene);
             canvas.onmouseup = scene.mouseUpEvent.bind(scene);
             canvas.onmousemove = scene.mouseMoveEvent.bind(scene);
 
-            canvas.addEventListener('touchstart',
-                scene.touchDownEvent.bind(scene));
+            canvas.ontouchstart =
+                scene.touchDownEvent.bind(scene);
+            //canvas.addEventListener('touchstart',
+                //scene.touchDownEvent.bind(scene));
             canvas.addEventListener('touchend',
                 scene.touchUpEvent.bind(scene));
-            canvas.addEventListener('touchmove',
-                scene.touchMoveEvent.bind(scene));
+            canvas.ontouchmove =
+                scene.touchMoveEvent.bind(scene);
+            //canvas.addEventListener('touchmove',
+                //scene.touchMoveEvent.bind(scene));
 
             // call to draw the scene initially
             scene.draw();
@@ -209,11 +215,9 @@
 
             function fitToContainer (canvas, scene) {
                 // Make it visually fill the positioned parent
-                canvas.style.width ='100%';
-                canvas.style.height='100%';
-                // ...then set the internal size to match
-                canvas.width  = canvas.offsetWidth;
-                canvas.height = canvas.offsetHeight;
+                const p = document.getElementById('main');
+                canvas.width  = p.offsetWidth;//window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+                canvas.height = p.offsetHeight;//window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
 
                 if ( scene )
                     scene.draw();
