@@ -2,10 +2,13 @@ body {
     background-color: #EBEBEB;
 }
 
+body, html {height:100%;}
+div.wrap {height:100%; overflow:hidden;}
+
 .main {
     /* border: 3px solid #73AD21; */
     float: left;
-    width: 80%;
+    width: 75%;
     height: 100%;
 }
 

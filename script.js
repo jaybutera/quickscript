@@ -243,8 +243,8 @@ class Scene {
         e.stopPropagation();
 
         // Current mouse position
-        let mx = parseInt(e.clientX - this.offsetX);
-        let my = parseInt(e.clientY - this.offsetY);
+        let mx = parseInt(e.clientX - e.target.offsetLeft);
+        let my = parseInt(e.clientY - e.target.offsetTop);
 
         this.handleDownEvent(mx, my);
     }
@@ -259,7 +259,9 @@ class Scene {
         // Just take the first, no multitouch here
         let touch = e.changedTouches[0];
 
-        this.handleDownEvent(touch.pageX, touch.pageY);
+        //if ( e.target.className == 
+        //this.handleDownEvent(touch.pageX, touch.pageY);
+        this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
     }
 
     // handle mousedown events
@@ -277,6 +279,11 @@ class Scene {
                 clicked_cell.isDragging = true;
 
                 this.selected = [clicked_cell.name, index];
+
+                // Update text input to match
+                const sel = this.selected;
+                document.getElementById('var-name').value =
+                    this.context[ sel[0] ].elems[ sel[1] ];
             }
         }
 

@@ -12,6 +12,7 @@
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
     <body data-rsssl=1>
+        <div class="wrap">
         <div class="main">
             <canvas id="myCanvas"></canvas>
         </div>
@@ -31,10 +32,10 @@
             <br />
             <br />
             <input type="submit" id="compile" value="compile">
+            <br />
+            <textarea id="lisp-code"></textarea>
         </div>
 
-        <br />
-        <textarea id="lisp-code"></textarea>
         <textarea id="debug"></textarea>
         <br />
 
@@ -43,11 +44,11 @@
         <script>
             const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
             const height = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
-            const UI_height = 0;//height / 3;
+            const UI_height = height / 3;
 
             let canvas = document.getElementById('myCanvas');
-            canvas.width = width;
-            canvas.height = height - UI_height;
+            fitToContainer(canvas, null);
+
             let ctx = canvas.getContext('2d');
 
             let cells = [
@@ -55,11 +56,18 @@
                 newList(10, 100, ['+', 'x', '2']),
             ];
 
+            // Special form functions and their arity
+            const special_fns = {
+                'lambda': 2,
+                'quote': 1,
+                'define': 2,
+                'if': 3,
+            };
+
             let scene = new Scene(canvas, ctx, cells);
             // A repl context for our definitions
             let global_env = std_env();
             drawContext();
-
 
             document.getElementById('var-name').onkeyup = () => {
                 scene.setCellValue( document.getElementById('var-name').value );
@@ -91,6 +99,10 @@
                 scene.removeCell( scene.selected[0] );
             }
 
+            window.onorientationchange = () => {
+                fitToContainer(canvas, scene);
+            }
+
             // listen for mouse events
             canvas.onmousedown = scene.mouseDownEvent.bind(scene);
             canvas.onmouseup = scene.mouseUpEvent.bind(scene);
@@ -108,19 +120,58 @@
 
             let dragged_fn;
 
+            function fnToCell (fname, env) {
+                // Include special form functions
+                for ( const [k,arity] of Object.entries(special_fns) )
+                    if ( k == fname )
+                        return [fname]
+                            .concat(Array.apply(null, Array(arity)).map( _ => ''));
+
+                // Otherwise look in env
+                const f = env[dragged_fn];
+                return [dragged_fn]
+                    .concat(Array.apply(null, Array(f.length)).map( _ => ''));
+            }
+
             document.ondrop = (e) => {
                 if ( isInCanvas(e.clientX, e.clientY) ) {
-                    const name = dragged_fn.innerHTML;
-                    const f = global_env[name];
-                    const empty_l = [name].concat(Array.apply(null, Array(f.length)).map( _ => ''));
-                    scene.addList(e.clientX, e.clientY, empty_l);
+                    const empty_cell = fnToCell(dragged_fn, global_env);
+                    scene.addList(e.clientX, e.clientY, empty_cell);
                 }
             };
-            document.ondragstart = (e) => { dragged_fn = e.target; };
+            document.ondragstart = (e) => { dragged_fn = e.target.innerHTML; };
             document.ondragover = e => {
                 if ( e.target.id == 'myCanvas' )
                     e.preventDefault();
             };
+
+            document.ontouchmove = e => {
+                if ( e.target.className == 'li-function' ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+
+            document.ontouchstart = e => {
+                if ( e.target.className == 'li-function' ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const touch = e.touches[0];
+                    dragged_fn = e.target.innerHTML;
+                }
+            };
+
+            document.ontouchend = (e => {
+                if ( e.target.className == 'li-function' ) {
+                    const touch = e.changedTouches[0];
+                    const mouseEvent = new MouseEvent("drop", {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                    });
+                    document.dispatchEvent( mouseEvent );
+                }
+            });
 
             function drawContext () {
                 const ul = document.getElementById('context');
@@ -128,13 +179,19 @@
                 ul.innerHTML = '';
 
                 // Redraw
-                Object.keys(global_env).forEach( k => {
+                Object.keys(special_fns)
+                    .concat( Object.keys(global_env) )
+                    .forEach( k => {
+
+                    if (k == 'outer') return;
+
                     const li  = document.createElement('li');
                     const div = document.createElement('div');
 
                     div.classList.add('li-function');
                     div.draggable = true;
                     div.appendChild( document.createTextNode(k) );
+
                     li.appendChild(div);
                     ul.appendChild( li );
                 });
@@ -149,6 +206,19 @@
                     return true;
                 else return false;
             }
+
+            function fitToContainer (canvas, scene) {
+                // Make it visually fill the positioned parent
+                canvas.style.width ='100%';
+                canvas.style.height='100%';
+                // ...then set the internal size to match
+                canvas.width  = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                if ( scene )
+                    scene.draw();
+            }
         </script>
+        </div>
     </body>
 </html>
