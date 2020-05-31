@@ -319,7 +319,7 @@ class Scene {
 
         //this.handleUpEvent(touch.pageX, touch.pageY);
         //this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
-        this.handleDownEvent(
+        this.handleUpEvent(
             touch.pageX - this.offsetX,
             touch.pageY - this.offsetY);
     }

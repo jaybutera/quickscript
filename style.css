@@ -6,7 +6,7 @@ body, html {height:100%;}
 div.wrap {height:100%; overflow:hidden;}
 
 #main {
-    border: 3px solid #73AD21;
+    /* border: 3px solid #73AD21; */
     float: left;
     width: 75%;
     height: 100%;
@@ -14,6 +14,9 @@ div.wrap {height:100%; overflow:hidden;}
 
 .control-panel {
     overflow: scroll;
+    height: 100%;
+}
+.ui {
     float: left;
     width: 20%;
     height: 100%;
@@ -22,11 +25,11 @@ div.wrap {height:100%; overflow:hidden;}
 @media screen and (max-width: 800px) {
     #main {
         width: 100%;
-        height: 80%;
+        height: 75%;
     }
-    .control-panel {
+    .ui {
         width: 100%;
-        height: 20%;
+        height: 25%;
     }
 }
 
@@ -40,8 +43,11 @@ div.wrap {height:100%; overflow:hidden;}
 li {
     list-style-type: none;
 }
+.li-function.p {
+    color: #A9C3B2;
+}
 .li-function {
-    background: green;
+    background: #25A04F;
     margin: 1%;
     padding-left: 10%;
     padding-top: 2%;

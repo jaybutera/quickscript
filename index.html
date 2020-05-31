@@ -17,22 +17,21 @@
             <canvas id="myCanvas"></canvas>
         </div>
 
-        <div class="control-panel">
-            <h3 style="font-size:3vw" align="center">Context</h3>
-            <ul id="context">
-            </ul>
-
+        <div class="ui">
             <input type="text" id="var-name">
             <br />
             <input type="text"   id="list-size" size="1">
             <input type="submit" id="new-cell" value="+">
             <input type="submit" id="remove-cons" value="-">
             <input type="submit" id="new-connect" value="->">
-            <br />
-            <br />
-            <input type="submit" id="compile" value="compile">
+            <input type="submit" id="compile" value="eval">
             <br />
             <textarea id="lisp-code"></textarea>
+
+            <div class="control-panel">
+                <!--<h3 style="font-size:3vw" align="center">Context</h3>-->
+                <ul id="context"></ul>
+            </div>
         </div>
 
         <textarea id="debug"></textarea>
@@ -112,14 +111,10 @@
 
             canvas.ontouchstart =
                 scene.touchDownEvent.bind(scene);
-            //canvas.addEventListener('touchstart',
-                //scene.touchDownEvent.bind(scene));
-            canvas.addEventListener('touchend',
-                scene.touchUpEvent.bind(scene));
+            canvas.ontouchend =
+                scene.touchUpEvent.bind(scene);
             canvas.ontouchmove =
                 scene.touchMoveEvent.bind(scene);
-            //canvas.addEventListener('touchmove',
-                //scene.touchMoveEvent.bind(scene));
 
             // call to draw the scene initially
             scene.draw();
@@ -193,10 +188,13 @@
 
                     const li  = document.createElement('li');
                     const div = document.createElement('div');
+                    //const p   = document.createElement('p');
 
                     div.classList.add('li-function');
+                    //p.appendChild( document.createTextNode(k) );
                     div.draggable = true;
                     div.appendChild( document.createTextNode(k) );
+                    //div.appendChild(p);
 
                     li.appendChild(div);
                     ul.appendChild( li );
