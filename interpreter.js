@@ -31,7 +31,7 @@ function read_from_tokens (tokens) {
 }
 
 function atom (token) {
-    if ( Number(token) )
+    if ( !isNaN( Number(token) ) )
         return Number(token);
     else return token;
 }
@@ -39,8 +39,12 @@ function atom (token) {
 function eval (x, env) {
     //console.log('x:', x)
     //console.log('env:', env)
-    if ( typeof(x) == 'string' ) // Symbol
+    if ( typeof(x) == 'string' ) { // Symbol
+        //console.log('in env: ' + JSON.stringify(env));
+        //console.log('finding ' + JSON.stringify(x));
+        //console.log('result is ' + env.find(x)[x]);
         return env.find(x)[x];
+    }
     else if ( !(x instanceof Array) ) // Constant
         return x;
 
@@ -51,8 +55,12 @@ function eval (x, env) {
         return args[0];
     else if ( x[0] == 'if' ) {
         [test, conseq, alt] = args;
+        //console.log('in env: ' + JSON.stringify(env));
+        //console.log('if ' + JSON.stringify(test) + ' ? ' + JSON.stringify(conseq) + ' : ' + JSON.stringify(alt));
         const exp = (eval(test, env) ? conseq : alt);
-        return eval(exp, env);
+        const r = eval(exp, env);
+        return r;
+        //return eval(exp, env);
     }
     else if ( x[0] == 'define' ) {
         [symbol, exp] = args;
@@ -65,9 +73,11 @@ function eval (x, env) {
     else { // Procedure call
         const proc = eval(op, env);
         const a = args.map( e => eval(e, env) );
-        console.log('proc: ', proc)
-        console.log('args: ', a)
-        return proc(...a);
+        //console.log('in env: ' + JSON.stringify(env));
+        //console.log('call: ' + JSON.stringify(op) + ' on ' + JSON.stringify(a));
+        const r = proc(...a);
+        return r;
+        //return proc(...a);
     }
 }
 
@@ -79,7 +89,13 @@ class Env {
     }
 
     find(v) {
-        return this[v] ? this : this.outer.find(v);
+        if ( this[v] != undefined ) return this;
+        else {
+            if ( !this.outer )
+                console.log('Could not find ' + v + ' in top level env:', this);
+            return this.outer.find(v);
+        }
+        //return this[v] ? this : return this.outer.find(v);
     }
 }
 
@@ -110,6 +126,7 @@ function std_env () {
     std_env['*'] = (x,y) => { return x*y; };
     std_env['-'] = (x,y) => { return x-y; };
     std_env['/'] = (x,y) => { return x/y; };
+    std_env['='] = (x,y) => { return x == y; };
     std_env['car'] = (l) => { return l[0]; };
     std_env['cdr'] = (l) => { return l.slice(1) };
     std_env['cons'] = (h,t) => { return [h].concat(t) };
@@ -134,7 +151,7 @@ function parseCells (expr, env) {
         return expr.split('"')[1];
     // Number literal
     //else if ( expr.match(/[0-9]*/)[0] == expr )
-    else if ( Number(expr) )
+    else if ( !isNaN( Number(expr) ) )
         return Number(expr);
     // Symbol or reference
     else {
