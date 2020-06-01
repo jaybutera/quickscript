@@ -19,12 +19,12 @@
 
         <div class="ui">
             <input type="text" id="var-name">
-            <br />
             <input type="text"   id="list-size" size="1">
             <input type="submit" id="new-cell" value="+">
             <input type="submit" id="remove-cons" value="-">
             <input type="submit" id="new-connect" value="->">
             <input type="submit" id="compile" value="eval">
+            <input type="submit" id="export" value="export">
             <br />
             <textarea id="lisp-code"></textarea>
 
@@ -34,8 +34,7 @@
             </div>
         </div>
 
-        <textarea id="debug"></textarea>
-        <br />
+        <!-- <textarea id="debug"></textarea> -->
 
         <script src = "./script.js"></script>
         <script src = "./interpreter.js"></script>
@@ -51,7 +50,8 @@
 
             let cells = [
                 newList(10, 50, ['lambda', 'x', 'x']),
-                newList(10, 100, ['+', 'x', '2']),
+                newList(10, 100, ['define', 'test', '']),
+                //newList(10, 100, ['+', 'x', '2']),
             ];
 
             // Special form functions and their arity
@@ -96,6 +96,13 @@
             document.getElementById('remove-cons').onclick = () => {
                 scene.removeCell( scene.selected[0] );
             }
+
+            document.getElementById('export').onclick = () => {
+                Object.entries(global_env).forEach( f => {
+                    console.log(f)
+                    console.log( serialize(f) );
+                });
+            };
 
             window.onorientationchange = () => {
                 fitToContainer(canvas, scene);

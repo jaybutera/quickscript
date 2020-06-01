@@ -237,7 +237,7 @@ class Scene {
     }
 
     mouseDownEvent (e) {
-        document.getElementById('debug').innerText = "mouse down";
+        //document.getElementById('debug').innerText = "mouse down";
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
@@ -250,7 +250,7 @@ class Scene {
     }
 
     touchDownEvent (e) {
-        document.getElementById('debug').innerText = "touch down";
+        //document.getElementById('debug').innerText = "touch down";
         console.log(e.pageX, ':', e.pageY);
 
         // tell the browser we're handling this touch event
@@ -377,7 +377,7 @@ class Scene {
 
     // Handle touch move event
     touchMoveEvent (e) {
-        document.getElementById('debug').innerText = "touch move";
+        //document.getElementById('debug').innerText = "touch move";
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();

@@ -64,6 +64,11 @@ function eval (x, env) {
     }
     else if ( x[0] == 'define' ) {
         [symbol, exp] = args;
+
+        // If this is a function definition, store data
+        if ( exp.length > 0 && exp[0] == 'lambda' )
+            defs[symbol] = { params: exp[1], body: exp[2] };
+
         env[symbol] = eval(exp, env);
     }
     else if ( x[0] == 'lambda' ) {
@@ -136,8 +141,20 @@ function std_env () {
 }
 
 function serialize (expr) {
-    if ( expr instanceof Array )
+    if ( expr instanceof Array ) {
+        // Handle special forms
+        // ---
+
+        // Lambda definitions
+        const f = defs[ expr[0] ];
+        if ( f != undefined ) {
+            return '(define ' + expr[0]
+                + ' (lambda ' + serialize(f.params) + ' ' + serialize(f.body) + ')'
+            + ')';
+        }
+
         return '(' + expr.map(serialize).join(' ') + ')'
+    }
     else
         return String(expr)
 }
@@ -162,6 +179,9 @@ function parseCells (expr, env) {
         else return expr;
     }
 }
+
+// Global store of user-defined definition bodies for serializing
+var defs = {};
 
 /*
 console.log( eval(parse(
