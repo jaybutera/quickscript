@@ -63,7 +63,19 @@
             let scene = new Scene(canvas, ctx, cells);
             // A repl context for our definitions
             let global_env = std_env();
+
+            // Load in any locally saved std env and definitions
+            loadLocalEnv(global_env);
             drawContext();
+
+            function loadLocalEnv (global_env) {
+                const loc_defs   = localStorage.getItem('defs');
+                if ( loc_defs != 'undefined' ) {
+                    const data = JSON.parse(loc_defs);
+                    defs = {...defs, ...data}
+                    importDefs(data, global_env);
+                }
+            }
 
             document.getElementById('var-name').onkeyup = () => {
                 scene.setCellValue( document.getElementById('var-name').value );

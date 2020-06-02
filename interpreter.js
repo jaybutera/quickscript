@@ -174,6 +174,11 @@ function std_env () {
     return std_env;
 }
 
+function importDefs (imports, env) {
+    for ( [name,body] of Object.entries(imports) )
+        env[name] = eval(body, env);
+}
+
 function parseCells (expr, env) {
     // String literal
     if ( expr instanceof Array )
