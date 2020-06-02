@@ -24,7 +24,6 @@
             <input type="submit" id="remove-cons" value="-">
             <input type="submit" id="new-connect" value="->">
             <input type="submit" id="compile" value="eval">
-            <input type="submit" id="export" value="export">
             <br />
             <textarea id="lisp-code"></textarea>
 
@@ -39,9 +38,9 @@
         <script src = "./script.js"></script>
         <script src = "./interpreter.js"></script>
         <script>
-            const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-            const height = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
-            const UI_height = height / 3;
+            //const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+            //const height = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
+            //const UI_height = height / 3;
 
             let canvas = document.getElementById('myCanvas');
             fitToContainer(canvas, null);
@@ -49,9 +48,8 @@
             let ctx = canvas.getContext('2d');
 
             let cells = [
-                newList(10, 50, ['lambda', 'x', 'x']),
-                newList(10, 100, ['define', 'test', '']),
-                //newList(10, 100, ['+', 'x', '2']),
+                newList(10, 50, ['define', 'test', '']),
+                newList(10, 100, ['lambda', 'x', 'x']),
             ];
 
             // Special form functions and their arity
@@ -80,6 +78,9 @@
                     parseCells(src_cell.elems, {...new Env(), ...scene.context}),
                     global_env);
 
+                // Resave definitions incase there is an update
+                localStorage.setItem('defs', JSON.stringify(defs));
+
                 // Output
                 document.getElementById('lisp-code').value = result;
 
@@ -96,13 +97,6 @@
             document.getElementById('remove-cons').onclick = () => {
                 scene.removeCell( scene.selected[0] );
             }
-
-            document.getElementById('export').onclick = () => {
-                Object.entries(global_env).forEach( f => {
-                    console.log(f)
-                    console.log( serialize(f) );
-                });
-            };
 
             window.onorientationchange = () => {
                 fitToContainer(canvas, scene);

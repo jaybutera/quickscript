@@ -58,16 +58,13 @@ function eval (x, env) {
         //console.log('in env: ' + JSON.stringify(env));
         //console.log('if ' + JSON.stringify(test) + ' ? ' + JSON.stringify(conseq) + ' : ' + JSON.stringify(alt));
         const exp = (eval(test, env) ? conseq : alt);
-        const r = eval(exp, env);
-        return r;
-        //return eval(exp, env);
+        return eval(exp, env);
     }
     else if ( x[0] == 'define' ) {
         [symbol, exp] = args;
 
-        // If this is a function definition, store data
-        if ( exp.length > 0 && exp[0] == 'lambda' )
-            defs[symbol] = { params: exp[1], body: exp[2] };
+        // Used for serializing AST
+        defs[symbol] = exp;
 
         env[symbol] = eval(exp, env);
     }
@@ -80,9 +77,7 @@ function eval (x, env) {
         const a = args.map( e => eval(e, env) );
         //console.log('in env: ' + JSON.stringify(env));
         //console.log('call: ' + JSON.stringify(op) + ' on ' + JSON.stringify(a));
-        const r = proc(...a);
-        return r;
-        //return proc(...a);
+        return proc(...a);
     }
 }
 
@@ -111,6 +106,35 @@ function Procedure (params, body, env) {
     return setArity(params.length, f);
 }
 
+/*
+function serializeDef(symbol, expr) {
+    if ( expr instanceof Array ) {
+        console.log( '(' + expr.map(serializeDef).join(' ') + ')' );
+        return '(' + expr.map(serializeDef).join(' ') + ')';
+    }
+    else
+        return String(expr);
+}
+*/
+
+/*
+class Procedure {
+    constructor (params, body, env) {
+        this.params = params;
+        this.body = body;
+        this.env = env;
+    }
+
+    function call() {
+        return setArity( eval(body, new Env(params, arguments, env)) );
+    }
+
+    // For native javascript functions to override the eval
+    function setCall() {
+    }
+}
+*/
+
 function setArity (arity, fn) {
     if (typeof arity !== 'number')
         throw new TypeError('Expected arity to be a number, got ' + arity);
@@ -136,27 +160,18 @@ function std_env () {
     std_env['cdr'] = (l) => { return l.slice(1) };
     std_env['cons'] = (h,t) => { return [h].concat(t) };
     std_env['map'] = (l,f) => { return l.map(f) };
+    std_env['defToStr'] = (d) => {
+        if ( !d ) return JSON.stringify(defs);
+        else return JSON.stringify( defs[d] );
+    };
+    std_env['import'] = (s) => {
+        const imports = JSON.parse(s);
+        defs = {...defs, ...imports};
+        for ( [name,body] of Object.entries(imports) )
+            std_env[name] = eval(body, std_env);
+    };
 
     return std_env;
-}
-
-function serialize (expr) {
-    if ( expr instanceof Array ) {
-        // Handle special forms
-        // ---
-
-        // Lambda definitions
-        const f = defs[ expr[0] ];
-        if ( f != undefined ) {
-            return '(define ' + expr[0]
-                + ' (lambda ' + serialize(f.params) + ' ' + serialize(f.body) + ')'
-            + ')';
-        }
-
-        return '(' + expr.map(serialize).join(' ') + ')'
-    }
-    else
-        return String(expr)
 }
 
 function parseCells (expr, env) {
@@ -164,8 +179,9 @@ function parseCells (expr, env) {
     if ( expr instanceof Array )
         return expr.map( e => parseCells(e, env) );
 
-    if ( expr.match(/\".*\"/) )
-        return expr.split('"')[1];
+    // String literal
+    //if ( expr.match(/\".*\"/) )
+        //return expr.split('"')[1];
     // Number literal
     //else if ( expr.match(/[0-9]*/)[0] == expr )
     else if ( !isNaN( Number(expr) ) )
