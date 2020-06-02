@@ -160,7 +160,10 @@ class Scene {
             const offset = 6;
             this.ctx.fillStyle = '#272727';
             this.ctx.font = '18px Helvetica';
-            this.ctx.fillText(cell.elems[i], cell.x + offset + x_offset, cell.y+CELL_HEIGHT-offset);
+            this.ctx.fillText(cell.elems[i],
+                cell.x + offset + x_offset,
+                cell.y+CELL_HEIGHT-offset,
+                CELL_WIDTH-offset);
         }
     }
 
@@ -188,7 +191,10 @@ class Scene {
         let offset = 6;
         this.ctx.fillStyle = '#272727';
         for ( let i = 0; i < cell.elems.length; i++)
-            this.ctx.fillText(cell.elems[i], cell.x + offset + CELL_WIDTH*i, cell.y+CELL_HEIGHT-offset);
+            this.ctx.fillText(cell.elems[i],
+                cell.x + offset + CELL_WIDTH*i,
+                cell.y+CELL_HEIGHT-offset,
+                CELL_WIDTH-offset);
 
         // Border whole box
         this.ctx.lineWidth = 1;
@@ -251,7 +257,6 @@ class Scene {
 
     touchDownEvent (e) {
         //document.getElementById('debug').innerText = "touch down";
-        console.log(e.pageX, ':', e.pageY);
 
         // tell the browser we're handling this touch event
         e.preventDefault();
