@@ -70,7 +70,7 @@
 
             function loadLocalEnv (global_env) {
                 const loc_defs   = localStorage.getItem('defs');
-                if ( loc_defs != 'undefined' ) {
+                if ( loc_defs != 'undefined' && loc_defs ) {
                     const data = JSON.parse(loc_defs);
                     defs = {...defs, ...data}
                     importDefs(data, global_env);
