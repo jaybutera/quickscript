@@ -86,9 +86,14 @@
                 let cons_list = scene.cells.filter( c => c.type == 'list');
 
                 // Evaluate
-                const result = eval(
-                    parseCells(src_cell.elems, {...new Env(), ...scene.context}),
-                    global_env);
+                let result;
+                try {
+                    result = eval(
+                        parseCells(src_cell.elems, {...new Env(), ...scene.context}),
+                        global_env);
+                } catch (e) {
+                    result = e;
+                }
 
                 // Resave definitions incase there is an update
                 localStorage.setItem('defs', JSON.stringify(defs));

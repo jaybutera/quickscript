@@ -37,12 +37,7 @@ function atom (token) {
 }
 
 function eval (x, env) {
-    //console.log('x:', x)
-    //console.log('env:', env)
     if ( typeof(x) == 'string' ) { // Symbol
-        //console.log('in env: ' + JSON.stringify(env));
-        //console.log('finding ' + JSON.stringify(x));
-        //console.log('result is ' + env.find(x)[x]);
         return env.find(x)[x];
     }
     else if ( !(x instanceof Array) ) // Constant
@@ -55,9 +50,7 @@ function eval (x, env) {
         return args[0];
     else if ( x[0] == 'if' ) {
         [test, conseq, alt] = args;
-        //console.log('in env: ' + JSON.stringify(env));
-        //console.log('if ' + JSON.stringify(test) + ' ? ' + JSON.stringify(conseq) + ' : ' + JSON.stringify(alt));
-        const exp = (eval(test, env) ? conseq : alt);
+        const exp = eval(test, env) ? conseq : alt;
         return eval(exp, env);
     }
     else if ( x[0] == 'define' ) {
@@ -92,7 +85,7 @@ class Env {
         if ( this[v] != undefined ) return this;
         else {
             if ( !this.outer )
-                console.log('Could not find ' + v + ' in top level env:', this);
+                throw new SubstError('Could not find ' + v + ' in top level env: ' + JSON.stringify(this));
             return this.outer.find(v);
         }
         //return this[v] ? this : return this.outer.find(v);
@@ -114,24 +107,6 @@ function serializeDef(symbol, expr) {
     }
     else
         return String(expr);
-}
-*/
-
-/*
-class Procedure {
-    constructor (params, body, env) {
-        this.params = params;
-        this.body = body;
-        this.env = env;
-    }
-
-    function call() {
-        return setArity( eval(body, new Env(params, arguments, env)) );
-    }
-
-    // For native javascript functions to override the eval
-    function setCall() {
-    }
 }
 */
 
@@ -198,6 +173,15 @@ function parseCells (expr, env) {
         if (v) return v.elems.map( e => parseCells(e, env) );
         // If v is not in env, it must be a symbol (string)
         else return expr;
+    }
+}
+
+function SubstError(message) {
+    this.name = 'SubstError';
+    this.message = message;
+
+    this.toString = () => {
+        return this.name + ': ' + this.message;
     }
 }
 
