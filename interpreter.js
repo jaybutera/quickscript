@@ -131,9 +131,25 @@ function std_env () {
     std_env['-'] = (x,y) => { return x-y; };
     std_env['/'] = (x,y) => { return x/y; };
     std_env['='] = (x,y) => { return x == y; };
-    std_env['car'] = (l) => { return l[0]; };
-    std_env['cdr'] = (l) => { return l.slice(1) };
-    std_env['cons'] = (h,t) => { return [h].concat(t) };
+    std_env['car'] = (l) => {
+        if ( l == 'nil' )
+            return l;
+        if ( !(l instanceof Array) )
+            throw new ValError('argument to car: ' + l + ' is not a list');
+        if ( l.length == 0 )
+            return 'nil';
+        return l[0];
+    };
+    std_env['cdr'] = (l) => {
+        if ( l == 'nil' )
+            return l;
+        if ( !(l instanceof Array) )
+            throw new ValError('argument to car: ' + l + ' is not a list');
+        if ( l.length == 0 )
+            return 'nil';
+        return l.slice(1)
+    };
+    std_env['cons'] = (h,t) => { return [h].concat(t).concat('nil'); };
     std_env['map'] = (l,f) => { return l.map(f) };
     std_env['defToStr'] = (d) => {
         if ( !d ) return JSON.stringify(defs);
@@ -178,6 +194,15 @@ function parseCells (expr, env) {
 
 function SubstError(message) {
     this.name = 'SubstError';
+    this.message = message;
+
+    this.toString = () => {
+        return this.name + ': ' + this.message;
+    }
+}
+
+function ValError(message) {
+    this.name = 'ValError';
     this.message = message;
 
     this.toString = () => {
