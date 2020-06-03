@@ -66,8 +66,8 @@ class Scene {
         this.BB  = canvas.getBoundingClientRect();
         this.offsetX = this.BB.top;
         this.offsetY = this.BB.top;
-        this.WIDTH   = canvas.width;
-        this.HEIGHT  = canvas.height;
+        this.width = () => { return canvas.width };
+        this.height = () => { return canvas.height };
 
         // drag related variables
         this.dragok  = false;
@@ -219,7 +219,7 @@ class Scene {
 
     // clear the canvas
     clear () {
-        ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
+        ctx.clearRect(0, 0, this.width(), this.height());
     }
 
     // redraw the scene
