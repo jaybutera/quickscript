@@ -36,52 +36,14 @@
         <!-- <textarea id="debug"></textarea> -->
 
         <script src = "./scene.js"></script>
-        <script src = "./interpreter.js"></script>
+        <!--<script type="module" src = "./interpreter.js"></script>-->
         <script src = "./auxillery.js"></script>
+        <script type="module" src = "./main.js"></script>
+        <!--
         <script>
-            //const width  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-            //const height = window.innerHeight|| document.documentElement.clientHeight|| document.body.clientHeight;
-            //const UI_height = height / 3;
-
-            let canvas = document.getElementById('myCanvas');
-            fitToContainer(canvas, null);
-
-            let ctx = canvas.getContext('2d');
-
-            let cells = [
-                newList(10, 50, ['define', 'test', '']),
-                newList(10, 100, ['lambda', 'x', 'x']),
-            ];
-
-            // Special form functions and their arity
-            const special_fns = {
-                'lambda': 2,
-                'quote': 1,
-                'define': 2,
-                'if': 3,
-            };
-
-            let scene = new Scene(canvas, ctx, cells);
-            // A repl context for our definitions
-            let global_env = std_env();
-
-            // Load in any locally saved std env and definitions
-            loadLocalEnv(global_env);
-            drawContext();
-
-/*
-            function loadLocalEnv (global_env) {
-                const loc_defs   = localStorage.getItem('defs');
-                if ( loc_defs != 'undefined' && loc_defs ) {
-                    const data = JSON.parse(loc_defs);
-                    defs = {...defs, ...data}
-                    importDefs(data, global_env);
-                }
-            }
-            */
-
         </script>
-        <script src = "./controller.js"></script>
+        -->
+        <!-- <script src = "./controller.js"></script> -->
         </div>
     </body>
 </html>

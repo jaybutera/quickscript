@@ -36,6 +36,8 @@ function newLine (x0,y0,x1,y1, from="", from_index=0, to="") {
     }
 }
 
+/*
+ * TODO: This can be used later but isn't right now
 function fromAST (expr) {
     if ( expr instanceof Array ) {
         // Push the current expr
@@ -59,6 +61,7 @@ function fromAST (expr) {
     // Only care about cells
     else return null
 }
+*/
 
 class Scene {
     constructor(canvas, ctx, cells) {
@@ -219,7 +222,7 @@ class Scene {
 
     // clear the canvas
     clear () {
-        ctx.clearRect(0, 0, this.width(), this.height());
+        this.ctx.clearRect(0, 0, this.width(), this.height());
     }
 
     // redraw the scene
@@ -238,12 +241,7 @@ class Scene {
         //    this.type_map[ c.type ](c);
     }
 
-    thisFn () {
-        return this;
-    }
-
     mouseDownEvent (e) {
-        //document.getElementById('debug').innerText = "mouse down";
         // tell the browser we're handling this mouse event
         e.preventDefault();
         e.stopPropagation();
@@ -256,8 +254,6 @@ class Scene {
     }
 
     touchDownEvent (e) {
-        //document.getElementById('debug').innerText = "touch down";
-
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();
@@ -265,8 +261,6 @@ class Scene {
         // Just take the first, no multitouch here
         let touch = e.changedTouches[0];
 
-        //if ( e.target.className == 
-        //this.handleDownEvent(touch.pageX, touch.pageY);
         this.handleDownEvent(
             touch.pageX - this.offsetX,
             touch.pageY - this.offsetY);
@@ -322,14 +316,12 @@ class Scene {
         // Just take the first, no multitouch here
         let touch = e.changedTouches[0];
 
-        //this.handleUpEvent(touch.pageX, touch.pageY);
-        //this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
         this.handleUpEvent(
             touch.pageX - this.offsetX,
             touch.pageY - this.offsetY);
     }
 
-    // handle mouseup events
+    // When a touch or mouse lets up
     handleUpEvent (x, y) {
         if (this.connecting) {
             this.connecting = false;
@@ -382,7 +374,6 @@ class Scene {
 
     // Handle touch move event
     touchMoveEvent (e) {
-        //document.getElementById('debug').innerText = "touch move";
         // tell the browser we're handling this touch event
         e.preventDefault();
         e.stopPropagation();
@@ -390,8 +381,6 @@ class Scene {
         // Just take the first, no multitouch here
         let touch = e.changedTouches[0];
 
-        //this.handleMoveEvent(touch.pageX, touch.pageY);
-        //this.handleDownEvent(touch.clientX - e.target.offsetLeft, touch.clientY - e.target.offsetTop);
         this.handleMoveEvent(
             touch.pageX - this.offsetX,
             touch.pageY - this.offsetY);

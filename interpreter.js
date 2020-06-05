@@ -1,15 +1,15 @@
-function tokenize (str) {
+export function tokenize (str) {
     return str
         .replace(/\(/g, ' ( ')
         .replace(/\)/g, ' ) ')
         .match(/\[[^\]]+\]|\S+\[[^\]]+\]|\S+/g);
 }
 
-function parse (program) {
+export function parse (program) {
     return read_from_tokens( tokenize(program) );
 }
 
-function read_from_tokens (tokens) {
+export function read_from_tokens (tokens) {
     if ( tokens.length == 0 )
         throw 'unexpected EOF'
 
@@ -30,13 +30,13 @@ function read_from_tokens (tokens) {
         return atom(token);
 }
 
-function atom (token) {
+export function atom (token) {
     if ( !isNaN( Number(token) ) )
         return Number(token);
     else return token;
 }
 
-function eval (x, env) {
+export function evaluate (x, env) {
     if ( typeof(x) == 'string' ) { // Symbol
         return env.find(x)[x];
     }
@@ -49,25 +49,29 @@ function eval (x, env) {
     if ( op == 'quote' ) // Quotation
         return args[0];
     else if ( x[0] == 'if' ) {
-        [test, conseq, alt] = args;
-        const exp = eval(test, env) ? conseq : alt;
-        return eval(exp, env);
+        const [test, conseq, alt] = args;
+        const exp = evaluate(test, env) ? conseq : alt;
+        return evaluate(exp, env);
     }
     else if ( x[0] == 'define' ) {
         [symbol, exp] = args;
 
-        // Used for serializing AST
-        defs[symbol] = exp;
+        // Don't allow defs to be overwritten
+        if ( symbol == 'defs' )
+            throw new ValError('"defs" is a reserved word. Cannot be used with define');
 
-        env[symbol] = eval(exp, env);
+        // Used for serializing AST
+        env.defs[symbol] = exp;
+
+        env[symbol] = evaluate(exp, env);
     }
     else if ( x[0] == 'lambda' ) {
-        [params, body] = args;
+        const [params, body] = args;
         return Procedure(params, body, env);
     }
     else { // Procedure call
-        const proc = eval(op, env);
-        const a = args.map( e => eval(e, env) );
+        const proc = evaluate(op, env);
+        const a = args.map( e => evaluate(e, env) );
         //console.log('in env: ' + JSON.stringify(env));
         //console.log('call: ' + JSON.stringify(op) + ' on ' + JSON.stringify(a));
         return proc(...a);
@@ -92,15 +96,15 @@ class Env {
     }
 }
 
-function Procedure (params, body, env) {
+export function Procedure (params, body, env) {
     function f () {
-        return eval(body, new Env(params, arguments, env));
+        return evaluate(body, new Env(params, arguments, env));
     };
     return setArity(params.length, f);
 }
 
 /*
-function serializeDef(symbol, expr) {
+export function serializeDef(symbol, expr) {
     if ( expr instanceof Array ) {
         console.log( '(' + expr.map(serializeDef).join(' ') + ')' );
         return '(' + expr.map(serializeDef).join(' ') + ')';
@@ -124,8 +128,8 @@ function setArity (arity, fn) {
     )(fn);
 };
 
-function std_env () {
-    const std_env = new Env();
+export function std_env () {
+    let std_env = new Env();
     std_env['+'] = (x,y) => { return x+y; };
     std_env['*'] = (x,y) => { return x*y; };
     std_env['-'] = (x,y) => { return x-y; };
@@ -152,25 +156,29 @@ function std_env () {
     std_env['cons'] = (h,t) => { return [h].concat(t).concat('nil'); };
     std_env['map'] = (l,f) => { return l.map(f) };
     std_env['defToStr'] = (d) => {
-        if ( !d ) return JSON.stringify(defs);
-        else return JSON.stringify( defs[d] );
+        // TODO: Take env as a parameter so that define can exist in sub-contexts
+        if ( !d ) return JSON.stringify(std_env.defs);
+        else return JSON.stringify( std_env.defs[d] );
     };
     std_env['import'] = (s) => {
         const imports = JSON.parse(s);
-        defs = {...defs, ...imports};
+        std_env.defs = {...std_env.defs, ...imports};
         for ( [name,body] of Object.entries(imports) )
-            std_env[name] = eval(body, std_env);
+            std_env[name] = evaluate(body, std_env);
     };
+
+    // Update with new definition ast's
+    std_env['defs'] = {};
 
     return std_env;
 }
 
-function importDefs (imports, env) {
-    for ( [name,body] of Object.entries(imports) )
-        env[name] = eval(body, env);
+export function importDefs (imports, env) {
+    for ( let [name,body] of Object.entries(imports) )
+        env[name] = evaluate(body, env);
 }
 
-function parseCells (expr, env) {
+export function parseCells (expr, env) {
     // String literal
     if ( expr instanceof Array )
         return expr.map( e => parseCells(e, env) );
@@ -192,7 +200,7 @@ function parseCells (expr, env) {
     }
 }
 
-function SubstError(message) {
+export function SubstError(message) {
     this.name = 'SubstError';
     this.message = message;
 
@@ -201,7 +209,7 @@ function SubstError(message) {
     }
 }
 
-function ValError(message) {
+export function ValError(message) {
     this.name = 'ValError';
     this.message = message;
 
@@ -210,11 +218,12 @@ function ValError(message) {
     }
 }
 
+
 // Global store of user-defined definition bodies for serializing
-var defs = {};
+//export var defs = {};
 
 /*
-console.log( eval(parse(
+console.log( evaluate(parse(
     '(map (cons 1 2) (lambda x (+ x 1)))')
     ,std_env()) );
 */
