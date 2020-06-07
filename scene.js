@@ -147,6 +147,9 @@ class Scene {
         // Draw rectangle
         this.ctx.fillStyle = '#4ed39e';
         this.ctx.fillRect(cell.x, cell.y, rect_len, CELL_HEIGHT);
+        // First cell is colored to show its a fn
+        this.ctx.fillStyle = '#43ad83';
+        this.ctx.fillRect(cell.x, cell.y, CELL_WIDTH, CELL_HEIGHT);
         this.ctx.lineWidth = .5;
         this.ctx.strokeStyle = "#333333";
         this.ctx.strokeRect(cell.x, cell.y, rect_len, CELL_HEIGHT);
@@ -161,12 +164,12 @@ class Scene {
 
             // Write data on cell
             const offset = 6;
-            this.ctx.fillStyle = '#272727';
+            this.ctx.fillStyle = i == 0 ? '#E7E7E7' : '#272727';
             this.ctx.font = '18px Helvetica';
             this.ctx.fillText(cell.elems[i],
                 cell.x + offset + x_offset,
                 cell.y+CELL_HEIGHT-offset,
-                CELL_WIDTH-offset);
+                CELL_WIDTH-offset*2);
         }
     }
 
@@ -197,7 +200,7 @@ class Scene {
             this.ctx.fillText(cell.elems[i],
                 cell.x + offset + CELL_WIDTH*i,
                 cell.y+CELL_HEIGHT-offset,
-                CELL_WIDTH-offset);
+                CELL_WIDTH-offset*2);
 
         // Border whole box
         this.ctx.lineWidth = 1;
