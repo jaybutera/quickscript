@@ -78,7 +78,7 @@ export function evaluate (x, env) {
     }
 }
 
-class Env {
+export class Env {
     constructor(params=[], args=[], outer=null) {
         for (let i = 0; i < params.length; i++)
             this[ params[i] ] = args[i];

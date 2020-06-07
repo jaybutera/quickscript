@@ -9,7 +9,7 @@ document.getElementById('compile').onclick = () => {
     // Evaluate
     let result;
     try {
-        result = evaluate(
+        result = Interp.evaluate(
             parseCells(src_cell.elems, {...new Env(), ...scene.context}),
             global_env);
     } catch (e) {
